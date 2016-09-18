@@ -1,0 +1,3 @@
+GC 为基础WINDOWS系统的服务器, 通讯模型为iocp
+ZH 为纯C语言写的通讯模块,可以跨平台, 通讯模型为select
+WebSock 是websocket的服务器
