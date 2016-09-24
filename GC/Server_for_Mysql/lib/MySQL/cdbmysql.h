@@ -18,13 +18,22 @@ g_MySql.setMysqlInfo(DB_INFO.host.c_str(),
 	DB_INFO.name.c_str(),
 	DB_INFO.pwd.c_str(),
 	DB_INFO.db.c_str());
+//执行SQL
+int cmdID=1;
+g_MySql.Query(&cmdID,(char*)sql);
 
 读取----------------------------------------
-while(mysql->GetRow())
+//MYSQL处理函数
+void ProcMysql(EzhMysqlOperator result,CzhMySql *mysql,TzhSqlInfo*info)
 {
-	setlog("%s",_S2WS(mysql->GetField("dev_uuid")));
+	int cmdID=*(int*)info->pTarget;
+	TzhSqlExc*p=(TzhSqlExc*)info->pTarget;
+	while(mysql->GetRow())
+	{
+		setlog("%s",_S2WS(mysql->GetField("dev_uuid")));
+	}
+	mysql->freeQueryRes();//一定要执行这句
 }
-
 */
 
 #ifndef __DB_MYSQL_H__
@@ -66,6 +75,7 @@ public:
 	char *GetField(char *fname,int *len = NULL);
 	bool HandleState();
 	TzhMysqlInfo* getInfo();
+	void freeQueryRes();
 
 	CzhMySql();
 	virtual ~CzhMySql();

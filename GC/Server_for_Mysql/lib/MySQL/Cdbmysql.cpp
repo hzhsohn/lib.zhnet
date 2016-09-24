@@ -3,7 +3,6 @@ g_DBMySql.cpp: implementation of the CzhMySql class.
 */
 #include "StdAfx.h"
 #include "Cdbmysql.h"
-#include "StringUtil.h"
 
 CzhMySql::CzhMySql()
 {
@@ -94,8 +93,11 @@ bool CzhMySql::Query(const char *sql,int len)
 			ShowError();
 			continue;
 		}
-
-		if (m_res != NULL) mysql_free_result(m_res);
+		if (m_res != NULL) 
+		{
+			mysql_free_result(m_res);
+			m_res=NULL;
+		}
 		m_res = mysql_store_result(m_handle);
 		if (m_res != NULL)
 		{
@@ -104,6 +106,7 @@ bool CzhMySql::Query(const char *sql,int len)
 		}
 		return true;
 	}
+	printf("CzhMySql query error!!!\n");
 	return false;
 }
 
@@ -123,7 +126,7 @@ char* CzhMySql::ShowError()
 	if(m_log)
 	{
 		sprintf(m_err,"SQL EER = [%s]", mysql_error(m_handle));
-		setlog("%s",_S2WS(m_err));
+		setlog("%s",m_err);
 		Close();
 	}
 	return m_err;
@@ -219,4 +222,13 @@ bool CzhMySql::HandleState()
 TzhMysqlInfo* CzhMySql::getInfo()
 {
 	return &m_dbinfo;
+}
+
+void CzhMySql::freeQueryRes()
+{
+	do 
+	{ 
+		m_res = mysql_store_result( m_handle ); 
+		mysql_free_result(m_res); 
+	}while( !mysql_next_result( m_handle ) );
 }

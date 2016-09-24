@@ -96,4 +96,6 @@ void ProcMysql(EzhMysqlOperator result,CzhMySql *mysql,TzhSqlInfo*info)
 		}
 		break;
 	}
+
+	mysql->freeQueryRes();
 }
