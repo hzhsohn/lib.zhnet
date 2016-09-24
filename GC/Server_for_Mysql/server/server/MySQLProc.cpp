@@ -88,9 +88,9 @@ void CMySQLProc::_thread(CMySQLProc*p)
 
 		LOCK_CS(&p->_csSqlList);
 		if(p->_lstSql.size()<=0)
-		{
-			Sleep(1);
+		{			
 			UNLOCK_CS(&p->_csSqlList);
+			Sleep(1);
 			continue;
 		}
 		else
