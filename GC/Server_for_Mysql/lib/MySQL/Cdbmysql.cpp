@@ -226,9 +226,12 @@ TzhMysqlInfo* CzhMySql::getInfo()
 
 void CzhMySql::freeQueryRes()
 {
-	do 
-	{ 
-		m_res = mysql_store_result( m_handle ); 
-		mysql_free_result(m_res); 
-	}while( !mysql_next_result( m_handle ) );
+	if(m_handle)
+	{
+		do 
+		{ 
+			m_res = mysql_store_result( m_handle ); 
+			mysql_free_result(m_res); 
+		}while( !mysql_next_result( m_handle ) );
+	}
 }
