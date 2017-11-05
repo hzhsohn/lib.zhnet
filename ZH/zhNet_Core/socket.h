@@ -179,7 +179,7 @@ bool zhSockHasExcept(SOCKET s,int tv_sec,int tv_usec);
  *设置成阻塞或非阻塞
 */
 bool zhSockSetNonBlocking(SOCKET s,bool bSetBlock);
-void zhSockReset(SOCKET s);
+void zhSockReset(SOCKET* s);
 
 /*
  *setting socket send and recv cache buffer

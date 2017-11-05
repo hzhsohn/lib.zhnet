@@ -370,7 +370,7 @@ bool zhSockHasExcept(SOCKET s,int tv_sec,int tv_usec)
 }
 
 
-void zhSockReset(SOCKET s)
+void zhSockReset(SOCKET* s)
 {
 	s = INVALID_SOCKET;
 }
