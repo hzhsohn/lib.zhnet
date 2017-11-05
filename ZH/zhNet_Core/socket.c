@@ -296,7 +296,7 @@ bool zhSockClose(SOCKET s)
 {
 	if (s == INVALID_SOCKET) return false;
 	CLOSESOCKET(s);
-	zhSockReset(s);
+	zhSockReset(&s);
 	if (--g_nCount==0)
 		zhSock_NetCleanUp();
 	return true;
