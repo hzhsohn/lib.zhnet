@@ -28,7 +28,7 @@
 /*
 
 boolean does not exist in the C function
-ÔÚCº¯ÊıÏÂ²»´æÔÚ²¼¶ûÖµÀàĞÍ,ËùÒÔÔÚ´Ë¶¨Òå
+åœ¨Cå‡½æ•°ä¸‹ä¸å­˜åœ¨å¸ƒå°”å€¼ç±»å‹,æ‰€ä»¥åœ¨æ­¤å®šä¹‰
 
 */
 #ifndef __cplusplus
@@ -114,7 +114,7 @@ extern "C"{
  *data check sum function,the function apply to 
  *zhUdpSendToPack/zhUdpSendTo/zhUdpRecvFrom function
  *
- *Êı¾İĞ£¼ì,Õâº¯ÊıÓ¦ÓÃÔÚzhUdpSendToPack/zhUdpSendTo/zhUdpRecvFromº¯ÊıÀï
+ *æ•°æ®æ ¡æ£€,è¿™å‡½æ•°åº”ç”¨åœ¨zhUdpSendToPack/zhUdpSendTo/zhUdpRecvFromå‡½æ•°é‡Œ
  */
 unsigned short zhPlatCRC16(unsigned char * frame, unsigned short len );
 
@@ -122,7 +122,7 @@ unsigned short zhPlatCRC16(unsigned char * frame, unsigned short len );
 /*
  *function: cross-platform use the sleep function
  *
- *¹¦ÄÜ:¿çÆ½Ì¨Ê¹ÓÃµÄĞİÃß¹¦ÄÜ
+ *åŠŸèƒ½:è·¨å¹³å°ä½¿ç”¨çš„ä¼‘çœ åŠŸèƒ½
 */
 void zhPlatSleep(int ms);
 
@@ -131,14 +131,14 @@ void zhPlatSleep(int ms);
  *function:Get milliseconds function, linux / unix 
  *after microsecond conversion
  *
- *¹¦ÄÜ:»ñÈ¡ºÁÃëº¯Êı,linux/unix¾­¹ıÎ¢Ãë×ª»»
+ *åŠŸèƒ½:è·å–æ¯«ç§’å‡½æ•°,linux/unixç»è¿‡å¾®ç§’è½¬æ¢
 */
 time_t zhPlatGetTime();
 
 /*
  *function: Get the system the number of seconds
  *
- *¹¦ÄÜ:»ñÈ¡ÏµÍ³ÃëÊı
+ *åŠŸèƒ½:è·å–ç³»ç»Ÿç§’æ•°
 */
 time_t zhPlatGetSec();
 
@@ -146,7 +146,7 @@ time_t zhPlatGetSec();
  *function:WIN32 platform to create and open the console, 
  *as well as the release of the console function
  *
- *¹¦ÄÜ:ÔÚWIN32Æ½Ì¨ÏÂ´´½¨²¢´ò¿ª¿ØÖÆÌ¨,ÒÔ¼°ÊÍ·Å¿ØÖÆÌ¨º¯Êı
+ *åŠŸèƒ½:åœ¨WIN32å¹³å°ä¸‹åˆ›å»ºå¹¶æ‰“å¼€æ§åˆ¶å°,ä»¥åŠé‡Šæ”¾æ§åˆ¶å°å‡½æ•°
 */
 void zhPlatCreateConsole();
 void zhPlatFreeConsole();
@@ -155,7 +155,7 @@ void zhPlatFreeConsole();
 /*
  *function: print global message function
  *
- *¹¦ÄÜ:´òÓ¡È«¾ÖÏûÏ¢º¯Êı
+ *åŠŸèƒ½:æ‰“å°å…¨å±€æ¶ˆæ¯å‡½æ•°
 */
 void zhPlatPrintf(char*format,...);
 void zhPlatPrint16(int len,char*buf);
@@ -165,7 +165,7 @@ char* zhPlatPrintf16ToBuf(int len,char *buf,char*dstString);
 /*
  *Macro: input information and printing
  *
- *ºê:ÊäÈëĞÅÏ¢²¢´òÓ¡
+ *å®:è¾“å…¥ä¿¡æ¯å¹¶æ‰“å°
 */
 #ifndef ZH_NET_DEBUG_PRINTF
 #define ZH_NET_DEBUG_PRINTF //zhPlatPrintf
@@ -174,13 +174,13 @@ char* zhPlatPrintf16ToBuf(int len,char *buf,char*dstString);
 #define PRINTF zhPlatPrintf
 
 //
-//·´×ª×Ö½Ú´¦ÀíË³Ğò,¼æÈİBig endian ºÍ Little endian ´¦ÀíÆ÷ÎÊÌâ
+//åè½¬å­—èŠ‚å¤„ç†é¡ºåº,å…¼å®¹Big endian å’Œ Little endian å¤„ç†å™¨é—®é¢˜
 //
 /*
  *Reverse bytes processed sequentially, 
  *compatible with Big endian and Little endian processor issues
  *
- *·´×ª×Ö½Ú´¦ÀíË³Ğò,¼æÈİBig endian ºÍ Little endian ´¦ÀíÆ÷ÎÊÌâ
+ *åè½¬å­—èŠ‚å¤„ç†é¡ºåº,å…¼å®¹Big endian å’Œ Little endian å¤„ç†å™¨é—®é¢˜
 */
 static void zhPlatRememory(void *byte,int len) {
     	int i;
