@@ -86,9 +86,9 @@ typedef enum _EzhNetType
 
 typedef enum _EzhNetShutdown
 {
-	ezhNetShutDownRD=0,		//¹Ø±ÕsockfdÉÏµÄ¶Á¹¦ÄÜ£¬´ËÑ¡Ïî½«²»ÔÊĞísockfd½øĞĞ¶Á²Ù×÷¡£
-	ezhNetShutDownWR=1,		//¹Ø±ÕsockfdµÄĞ´¹¦ÄÜ£¬´ËÑ¡Ïî½«²»ÔÊĞísockfd½øĞĞĞ´²Ù×÷¡£
-	ezhNetShutDownRDWR=2	//¹Ø±ÕsockfdµÄ¶ÁĞ´¹¦ÄÜ¡£
+	ezhNetShutDownRD=0,		//å…³é—­sockfdä¸Šçš„è¯»åŠŸèƒ½ï¼Œæ­¤é€‰é¡¹å°†ä¸å…è®¸sockfdè¿›è¡Œè¯»æ“ä½œã€‚
+	ezhNetShutDownWR=1,		//å…³é—­sockfdçš„å†™åŠŸèƒ½ï¼Œæ­¤é€‰é¡¹å°†ä¸å…è®¸sockfdè¿›è¡Œå†™æ“ä½œã€‚
+	ezhNetShutDownRDWR=2	//å…³é—­sockfdçš„è¯»å†™åŠŸèƒ½ã€‚
 }EzhNetShutdown;
 
 #define		ZH_SOCK_UDP		ezhNetTypeUDP
@@ -121,28 +121,28 @@ bool zhSockClose(SOCKET s);
  *used for non-blocking connection If you have access to obstructive
  *connection thread waits 75 seconds by default
  *
- *ÓÃÓÚ·Ç×èÈûĞÔÁ¬½Ó,Èç¹ûÈ¡ÓÃ×èÈûĞÔÁ¬½Ó»áÄ¬ÈÏ75ÃëµÄÏß³ÌµÈ´ı
+ *ç”¨äºéé˜»å¡æ€§è¿æ¥,å¦‚æœå–ç”¨é˜»å¡æ€§è¿æ¥ä¼šé»˜è®¤75ç§’çš„çº¿ç¨‹ç­‰å¾…
 */
 bool zhSockConnect(SOCKET s,char *szAddr,int port,unsigned long ip);
 
 /*
  *for obstructive connected, according to to set the block timeout
  *
- *×èÈûĞÔÁ¬½Ó,¿ÉÒÔ¸ù¾İĞèÒªÉè¶¨×èÈûÊ±¼ä
+ *é˜»å¡æ€§è¿æ¥,å¯ä»¥æ ¹æ®éœ€è¦è®¾å®šé˜»å¡æ—¶é—´
 */
 bool zhSockBlockingConnect(SOCKET s,char *host,int port, unsigned long ip, int timeout_second);
 
 /*
  *bind port
  *
- *°ó¶¨¶Ë¿Ú
+ *ç»‘å®šç«¯å£
 */
 bool zhSockBindAddr(SOCKET s,char *ip,int port);
 
 /*
  *port listen
  *
- *¼àÌı¶Ë¿Ú
+ *ç›‘å¬ç«¯å£
 */
 bool zhSockListen(SOCKET s);
 
@@ -150,14 +150,14 @@ bool zhSockListen(SOCKET s);
 /*
  *accept function
  *
- *½Ó¿Úº¯Êı²¢´´½¨
+ *æ¥å£å‡½æ•°å¹¶åˆ›å»º
 */
 SOCKET zhSockAccept(SOCKET s);
 
 /*
  *send and recv process
  *
- *ÍøÂçÊı¾İ·¢ËÍºÍ½ÓÊÕ´¦Àí
+ *ç½‘ç»œæ•°æ®å‘é€å’Œæ¥æ”¶å¤„ç†
 */
 int zhSockRecv(SOCKET s,char *buf,int buf_len);
 int zhSockSend(SOCKET s,char *buf,int len);
@@ -167,7 +167,7 @@ int zhSockSendTo(SOCKET s,char *buf,int len,struct sockaddr_in *addr);
 /*
  *using select network method to process blocking
  *
- *Ê¹ÓÃselectÄ£ĞÍ´¦Àí×èÈûµÄº¯Êı
+ *ä½¿ç”¨selectæ¨¡å‹å¤„ç†é˜»å¡çš„å‡½æ•°
 */
 bool zhSockCanWrite(SOCKET s,int tv_sec,int tv_usec);
 bool zhSockCanRead(SOCKET s,int tv_sec,int tv_usec);
@@ -176,7 +176,7 @@ bool zhSockHasExcept(SOCKET s,int tv_sec,int tv_usec);
 /*
  *setting blocking configure
  *
- *ÉèÖÃ³É×èÈû»ò·Ç×èÈû
+ *è®¾ç½®æˆé˜»å¡æˆ–éé˜»å¡
 */
 bool zhSockSetNonBlocking(SOCKET s,bool bSetBlock);
 void zhSockReset(SOCKET* s);
@@ -184,7 +184,7 @@ void zhSockReset(SOCKET* s);
 /*
  *setting socket send and recv cache buffer
  *
- *»º³åÇø´óĞ¡ÉèÖÃ
+ *ç¼“å†²åŒºå¤§å°è®¾ç½®
 */
 bool zhSockSetSendBufferSize(SOCKET s,int len);
 bool zhSockSetRecvBufferSize(SOCKET s,int len);
@@ -193,14 +193,14 @@ bool zhSockSetRecvBufferSize(SOCKET s,int len);
 /*
  *linux/unix using the reset the listen port
  *
- *ÊÇlinux»òunixÊ¹ÓÃÖØÖÃ¼àÌı¶Ë¿Ú¹¦ÄÜ
+ *æ˜¯linuxæˆ–unixä½¿ç”¨é‡ç½®ç›‘å¬ç«¯å£åŠŸèƒ½
 */
 bool zhSockSetReuseAddr(SOCKET s,bool reuse);
 
 /*
  *get socket ip and port
  *
- *»ñÈ¡socket¶ÔÓ¦µÄipºÍ¶Ë¿Ú
+ *è·å–socketå¯¹åº”çš„ipå’Œç«¯å£
 */
 bool zhSockGetLocalAddr (SOCKET s,char *addr,unsigned short *port,unsigned long *ip);
 bool zhSockGetRemoteAddr(SOCKET s,char *addr,unsigned short *port,unsigned long *ip);
@@ -208,28 +208,28 @@ bool zhSockGetRemoteAddr(SOCKET s,char *addr,unsigned short *port,unsigned long 
 /*
  *data obtained from addr ip and prot
  *
- *´ÓaddrÀï»ñÈ¡ipºÍprotµÄÊı¾İ
+ *ä»addré‡Œè·å–ipå’Œprotçš„æ•°æ®
  */
 void zhSockAddrToPram(const struct sockaddr_in *addr,char*ip,unsigned short *port);
 
 /*
  *ip with the port of data stored in addr
  *
- *½«ip¸úportµÄÊı¾İ´æÈëaddrÀï
+ *å°†ipè·Ÿportçš„æ•°æ®å­˜å…¥addré‡Œ
  */
 void zhSockPramToAddr(const char*ip,unsigned short port,struct sockaddr_in *addr);
 
 /*
  *return network sdk socket count
  *
- *·µ»Ø±¾SOCKETÀàµÄSOCKETÊ¹ÓÃÊıÁ¿
+ *è¿”å›æœ¬SOCKETç±»çš„SOCKETä½¿ç”¨æ•°é‡
 */
 int zhSockGetCount();
 
 /*
  *wince and windows using initizal/release socket function
  *
- *windowsÏµÍ³Ê¹ÓÃµÄ³õÊ¼»¯ºÍ×¢ÏúsocketµÄ¹¦ÄÜ
+ *windowsç³»ç»Ÿä½¿ç”¨çš„åˆå§‹åŒ–å’Œæ³¨é”€socketçš„åŠŸèƒ½
 */
 bool zhSock_NetStartUp(int VersionHigh,int VersionLow);
 bool zhSock_NetCleanUp();
@@ -237,7 +237,7 @@ bool zhSock_NetCleanUp();
 /*
  *get host to ip 
  *
- *»ñÈ¡ÓòÃûIP
+ *è·å–åŸŸåIP
 */
 char* zhSockGetIp(char*host);
 
