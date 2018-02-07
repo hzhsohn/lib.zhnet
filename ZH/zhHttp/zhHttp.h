@@ -30,7 +30,8 @@ typedef enum _EzhHttpOperat
 	ezhHttpOperatFinish,
 	ezhHttpOperatRecviceFail,//内容出错
 	ezhHttpOperatConnectFail,//连接服务器失败
-	ezhHttpOperatPostFail	//POST内容到服务器未完成的时候,网络中断,会导致这个错误产生
+	ezhHttpOperatPostFail,	//POST内容到服务器未完成的时候,网络中断,会导致这个错误产生
+	ezhHttpOperatPageJump //WEB被强制跳转
 }EzhHttpOperat;
 
 /*

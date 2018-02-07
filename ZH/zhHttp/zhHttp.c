@@ -240,10 +240,10 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 {
 	int doc_total_len;
 	bool ret;
-	char recv_buf[2048];
+	char recv_buf[1024];
 	int recv_len;
 	int recv_total_len;
-	char cache_buf[1024];
+	char cache_buf[2048];
 	int cache_len;
 	char *pSearch;
 	int search_len;
@@ -340,6 +340,8 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 						send_len-=ret;
 						zhPlatSleep(1);
 					}
+					else if(0==ret)
+					{}
 					else if(-1==ret)
 					{
 						p->pfCallback(ezhHttpOperatPostFail,p->host,p->port,p->file,p->parameter,p->body,p->body_len,NULL,0);
@@ -397,7 +399,7 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 	while(1)
 	{
 		//这里接收的是cache的缓冲区大小
-		recv_len=zhSockRecv(p->s,recv_buf,1023);
+		recv_len=zhSockRecv(p->s,recv_buf,sizeof(recv_buf));
 		if(recv_len>0)
 		{
 			if(cache_len+recv_len>=sizeof(cache_buf))
@@ -429,12 +431,30 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 				}
 				if(jmp)
 				{
-					//获取数据
-					char value[32]={0};
-					zhHttpGetProtocolValue(cache_buf,"Content-Length",value);
-					doc_total_len=atoi(value);
-					
-					goto _data_ok;
+					char a[50]={0};
+					char b[50]={0};
+					char c[50]={0};
+					sscanf(cache_buf,"%s %s %s",a,b,c);
+					if(0==strcmp("200",b))
+					{
+						//获取数据
+						char value[32]={0};
+						zhHttpGetProtocolValue(cache_buf,"Content-Length",value);
+						doc_total_len=atoi(value);
+						goto _data_ok;
+					}
+					else if(0==strcmp("302",b))
+					{
+						char value[128]={0};
+						zhHttpGetProtocolValue(cache_buf,"Location",value);
+						p->pfCallback(ezhHttpOperatPageJump,p->host,p->port,p->file,p->parameter,p->body,p->body_len,value,strlen(value));
+						goto _end;
+					}
+					else
+					{
+						p->pfCallback(ezhHttpOperatRecviceFail,p->host,p->port,p->file,p->parameter,p->body,p->body_len,NULL,0);
+						goto _end;
+					}
 				}
 			}
 		}
@@ -499,10 +519,10 @@ _end:
 void _zhHttpThread_Head(TzhHttpThread* p)
 {
 	bool ret;
-	char recv_buf[2048];
+	char recv_buf[1024];
 	int recv_len;
 	int doc_total_len;//这里是根据返回来的头确定要接收的长度
-	char cache_buf[1024];
+	char cache_buf[2048];
 	int cache_len;
 	char *pSearch;
 	int search_len;
@@ -553,7 +573,7 @@ void _zhHttpThread_Head(TzhHttpThread* p)
 	while(1)
 	{
 		//这里接收的是cache的缓冲区大小
-		recv_len=zhSockRecv(p->s,recv_buf,1023);
+		recv_len=zhSockRecv(p->s,recv_buf,sizeof(recv_buf));
 		if(recv_len>0)
 		{
 			if(cache_len+recv_len>=sizeof(cache_buf))
@@ -585,11 +605,30 @@ void _zhHttpThread_Head(TzhHttpThread* p)
 				}
 				if(jmp)
 				{
-					//获取数据
-					char value[32]={0};
-					zhHttpGetProtocolValue(cache_buf,"Content-Length",value);
-					doc_total_len=atoi(value);
-					goto _data_ok;
+					char a[50]={0};
+					char b[50]={0};
+					char c[50]={0};
+					sscanf(cache_buf,"%s %s %s",a,b,c);
+					if(0==strcmp("200",b))
+					{
+						//获取数据
+						char value[32]={0};
+						zhHttpGetProtocolValue(cache_buf,"Content-Length",value);
+						doc_total_len=atoi(value);
+						goto _data_ok;
+					}
+					else if(0==strcmp("302",b))
+					{
+						char value[128]={0};
+						zhHttpGetProtocolValue(cache_buf,"Location",value);
+						p->pfCallback(ezhHttpOperatPageJump,p->host,p->port,p->file,p->parameter,p->body,p->body_len,value,strlen(value));
+						goto _end;
+					}
+					else
+					{
+						p->pfCallback(ezhHttpOperatRecviceFail,p->host,p->port,p->file,p->parameter,p->body,p->body_len,NULL,0);
+						goto _end;
+					}
 				}
 			}
 		}

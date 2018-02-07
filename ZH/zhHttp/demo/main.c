@@ -51,6 +51,11 @@ void httpCallBack(EzhHttpOperat operat,
 			printf("ezhHttpOperatPostFail!!\r\n");
 		}
 		break;
+	case ezhHttpOperatPageJump:
+		{
+			printf("http-------------ezhHttpOperatPageJump!!  len=%d  szBuf=%s\r\n",nLen,szBuf);
+		}
+		break;
 	}
 }
 
@@ -75,6 +80,12 @@ int main(int argc, char* argv[])
 	zhHttpUrlSplit("http://www.hanzhihong.cn:88/ddd/a.html?q=123",dst_host,&dst_port,dst_file,dst_pram);
 	zhHttpUrlSplit("http://www.hanzhihong.cn?q=bbb",dst_host,&dst_port,dst_file,dst_pram);
 	
+	{
+	char mp3_path[]="http://music.hanzhihong.cn/music/tiancaibaichi.mp3";
+	zhHttpSize(mp3_path,5,httpCallBack);
+	}
+	getchar();
+
 	//获取网页内容,URL地址配合zhHttpUrlEncode()和zhHttpUrlDecode()
 	zhHttpSize("http://p1.qhimg.com/t0151320b1d0fc50be8.png",5,httpCallBack);
 	zhPlatSleep(3000);
