@@ -23,7 +23,7 @@ void httpCallBack(EzhHttpOperat operat,
 		break;
 	case ezhHttpOperatGetData:
 		{
-			printf("Data nLen=%d {%%s}\r\n",nLen,szBuf);
+			printf("Data nLen=%d \r\n",nLen);
 		}
 		break;
 	case ezhHttpOperatGetSize:
@@ -83,6 +83,11 @@ int main(int argc, char* argv[])
 	{
 	char mp3_path[]="http://music.hanzhihong.cn/music/tiancaibaichi.mp3";
 	zhHttpSize(mp3_path,5,httpCallBack);
+	}
+	zhPlatSleep(3000);
+	{
+	char mp3_path[]="http://101.247.192.66/files/506900000597CDBA/music.hanzhihong.cn/music/tiancaibaichi.mp3";
+	zhHttpGet(mp3_path,0,5,httpCallBack);
 	}
 	getchar();
 

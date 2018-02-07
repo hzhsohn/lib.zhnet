@@ -435,7 +435,7 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 					char b[50]={0};
 					char c[50]={0};
 					sscanf(cache_buf,"%s %s %s",a,b,c);
-					if(0==strcmp("200",b))
+					if(0==strcmp("200",b) || 0==strcmp("206",b))
 					{
 						//获取数据
 						char value[32]={0};
@@ -481,10 +481,9 @@ _data_ok:
 	//接收返回来的内容
 	while(1)
 	{
-		recv_len=zhSockRecv(p->s,recv_buf,2047);
+		recv_len=zhSockRecv(p->s,recv_buf,sizeof(recv_buf));
 		if(recv_len>0)
 		{
-			recv_buf[recv_len]=0;
 			p->pfCallback(ezhHttpOperatGetData,p->host,p->port,p->file,p->parameter,p->body,p->body_len,recv_buf,recv_len);
 			recv_total_len+=recv_len;
 		}
@@ -609,7 +608,7 @@ void _zhHttpThread_Head(TzhHttpThread* p)
 					char b[50]={0};
 					char c[50]={0};
 					sscanf(cache_buf,"%s %s %s",a,b,c);
-					if(0==strcmp("200",b))
+					if(0==strcmp("200",b) || 0==strcmp("206",b))
 					{
 						//获取数据
 						char value[32]={0};
