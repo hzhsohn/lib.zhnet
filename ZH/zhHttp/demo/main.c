@@ -3,7 +3,6 @@
 
 #include "../zhHttp.h"
 
-
 void httpCallBack(EzhHttpOperat operat,
 						   char*host,
 						   int port,
@@ -23,7 +22,7 @@ void httpCallBack(EzhHttpOperat operat,
 		break;
 	case ezhHttpOperatGetData:
 		{
-			printf("Data nLen=%d \r\n",nLen);
+			printf("Data nLen=%d --->%p \r\n",nLen,szBuf);
 		}
 		break;
 	case ezhHttpOperatGetSize:
@@ -66,7 +65,6 @@ int main(int argc, char* argv[])
 	char dst_file[512];
 	char dst_pram[2048];
 
-
 	//²âÊÔÀý×Ó
 	zhHttpUrlSplit("http://www.hanzhihong.cn",dst_host,&dst_port,dst_file,dst_pram);
 	zhHttpUrlSplit("http:\\\\www.hanzhihong.cn",dst_host,&dst_port,dst_file,dst_pram);
@@ -81,12 +79,14 @@ int main(int argc, char* argv[])
 	zhHttpUrlSplit("http://www.hanzhihong.cn?q=bbb",dst_host,&dst_port,dst_file,dst_pram);
 	
 	{
-	char mp3_path[]="http://music.hanzhihong.cn/music/tiancaibaichi.mp3";
+	char mp3_path[]="http://101.247.192.66/files/506900000597CDBA/music.hanzhihong.cn/music/tiancaibaichi.mp3";
+	printf("---------------get file size...\n");
 	zhHttpSize(mp3_path,5,httpCallBack);
 	}
-	zhPlatSleep(3000);
+	zhPlatSleep(2000);
 	{
 	char mp3_path[]="http://101.247.192.66/files/506900000597CDBA/music.hanzhihong.cn/music/tiancaibaichi.mp3";
+	printf("---------------download file size...\n");
 	zhHttpGet(mp3_path,0,5,httpCallBack);
 	}
 	getchar();

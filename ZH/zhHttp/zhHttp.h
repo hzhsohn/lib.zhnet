@@ -66,6 +66,9 @@ typedef struct _TzhHttpThread
 	int beginByte;
 	int timeout_second;
 
+	//上传文件的指针
+	FILE*posfp;
+
 	//回调函数
 	ZH_ONHTTPDATA* pfCallback;
 }TzhHttpThread;
@@ -91,7 +94,8 @@ bool zhHttpGet(const char*szUrl,int begin_byte,int timeout_second,ZH_ONHTTPDATA*
 	将内容提交到服务器
 */
 bool zhHttpPost(const char*szUrl,const char*body,int body_len,int begin_byte,int timeout_second,ZH_ONHTTPDATA* pfCallback);
-//提交文件函数,待写
+
+bool zhHttpPostFile(const char*szUrl,FILE* postFile,int timeout_second,ZH_ONHTTPDATA* pfCallback);
 
 
 /*

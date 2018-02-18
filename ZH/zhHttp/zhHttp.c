@@ -107,8 +107,8 @@ bool zhHttpGet(const char*szUrl,int begin_byte,int timeout_second,ZH_ONHTTPDATA*
 	threadParm->timeout_second=timeout_second;
 	threadParm->pfCallback=pfCallback;
 
-	//开启线程
-	CREATE_THREAD(_zhHttpThread_Data,threadParm);
+	//
+	_zhHttpThread_Data(threadParm);
 	return ret;
 }
 
@@ -134,8 +134,39 @@ bool zhHttpPost(const char*szUrl,const char*body,int body_len,int begin_byte,int
 	threadParm->timeout_second=timeout_second;
 	threadParm->pfCallback=pfCallback;
 
+	//
+	_zhHttpThread_Data(threadParm);
+	return ret;
+}
+
+bool zhHttpPostFile(const char*szUrl,FILE* postFile,int timeout_second,ZH_ONHTTPDATA* pfCallback)
+{
+	TzhHttpThread* threadParm;
+	bool ret;
+	SOCKET s;
+	
+	threadParm=(TzhHttpThread*)malloc(sizeof(TzhHttpThread));
+	memset(threadParm,0,sizeof(TzhHttpThread));
+
+	zhSockInit(&s,ZH_SOCK_TCP);
+	threadParm->s=s;
+
+	//解析参数
+	ret=zhHttpUrlSplit(szUrl,threadParm->host,&threadParm->port,threadParm->file,threadParm->parameter);
+	threadParm->method=3;
+	threadParm->body=NULL;
+	threadParm->body_len=0;
+	threadParm->beginByte=0;
+	threadParm->posfp=postFile;
+	threadParm->timeout_second=timeout_second;
+	threadParm->pfCallback=pfCallback;
+
 	//开启线程
-	CREATE_THREAD(_zhHttpThread_Data,threadParm);
+	_zhHttpThread_Data(threadParm);
+	//
+	free(threadParm);
+	threadParm=NULL;
+
 	return ret;
 }
 
@@ -160,8 +191,12 @@ bool zhHttpSize(const char*szUrl,int timeout_second,ZH_ONHTTPDATA* pfCallback)
 	threadParm->timeout_second=timeout_second;
 	threadParm->pfCallback=pfCallback;
 
-	//开启线程,专门用来解释参数
-	CREATE_THREAD(_zhHttpThread_Head,threadParm);
+	//专门用来解释参数
+	_zhHttpThread_Head(threadParm);
+	//
+	free(threadParm);
+	threadParm=NULL;
+
 	return ret;
 }
 
@@ -294,7 +329,14 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 			int send_len;
 			int send_pos;
 
-			sprintf(tmp,"POST %s?%s HTTP/1.1\r\n",p->file,p->parameter);
+			if(p->parameter[0])
+				{
+					sprintf(tmp,"POST %s?%s HTTP/1.1\r\n",p->file,p->parameter);
+				}
+				else
+				{
+					sprintf(tmp,"POST %s HTTP/1.1\r\n",p->file);
+				}
 			strcat(buf,tmp);
 			sprintf(tmp,"Accept: */*\r\n");
 			strcat(buf,tmp);
@@ -325,35 +367,109 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 			send_pos=0;
 			while(true)
 			{
-				if(send_len<=1024)
-				{
-					zhSockSend(p->s,p->body,send_len);
-					break;
-				}
-				else
-				{
 					int ret;
-					ret=zhSockSend(p->s,&p->body[send_pos],1024);
+					ret=zhSockSend(p->s,&p->body[send_pos],send_len);
 					if(ret>0)
 					{
 						send_pos+=ret;
 						send_len-=ret;
-						zhPlatSleep(1);
 					}
 					else if(0==ret)
-					{}
+					{
+						zhPlatSleep(1);
+					}
 					else if(-1==ret)
 					{
 						p->pfCallback(ezhHttpOperatPostFail,p->host,p->port,p->file,p->parameter,p->body,p->body_len,NULL,0);
 						goto _end;
 					}
-				}
+					if(send_len<=0)
+					{break;}
 			}
 			//-----------------
 		}
 		break;
 	case 3://post提交文件模式
 		{
+				int rlret=0;
+				int rlen=0;
+				char* read_buf;
+				//提交HTTP头
+				char tmp[256];
+				char subPostDescrpt[32]={0};
+				sprintf(subPostDescrpt,"-------%ld",time(NULL));
+
+				if(p->parameter[0])
+				{
+					sprintf(tmp,"POST %s?%s HTTP/1.1\r\n",p->file,p->parameter);
+				}
+				else
+				{
+					sprintf(tmp,"POST %s HTTP/1.1\r\n",p->file);
+				}
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Accept: */*\r\n");
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Content-Type: multipart/form-data; boundary=%s\r\n",subPostDescrpt);
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"User-Agent: zhHttp/1.0\r\n");
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Accept-Encoding: gzip, deflate\r\n");
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Referer: http://%s%s \r\n",p->host,p->file);
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Host: %s:%d\r\n",p->host,p->port);
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Content-Length: %d\r\n",p->body_len);
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Connection: Keep-Alive\r\n");
+				zhSockSend(p->s,tmp,strlen(tmp));
+				sprintf(tmp,"Cache-Control: no-cache\r\n");
+				zhSockSend(p->s,tmp,strlen(tmp));
+				zhSockSend(p->s,"\r\n",2);
+
+				//----------------分割提交
+				zhSockSend(p->s,subPostDescrpt,strlen(subPostDescrpt)); 
+				zhSockSend(p->s,"\r\n",2);
+				//
+				if(p->posfp)
+				{
+						read_buf =(char* )malloc(1024);
+						do{
+								rlen=fread(read_buf,1,1024,p->posfp);
+								if(rlen>0)
+								{
+									int send_len=rlen;
+									while(true)
+									{
+										rlret=zhSockSend(p->s,read_buf,rlen);
+										if(rlret>0)
+										{
+											send_len-=rlret;
+										}
+										else if(0==rlret)
+										{
+											zhPlatSleep(1);
+										}
+										else if(-1==rlret)
+										{
+											p->pfCallback(ezhHttpOperatPostFail,p->host,p->port,p->file,p->parameter,p->body,p->body_len,NULL,0);
+											goto _end;
+										}
+										if(send_len<=0)
+										{break;}
+									}
+								}
+						}while(rlen>0);
+				
+						free(read_buf);
+						read_buf=NULL;
+				}
+				//----------------分割提交
+				zhSockSend(p->s,subPostDescrpt,strlen(subPostDescrpt)); 
+				zhSockSend(p->s,"\r\n",2);
+				zhSockSend(p->s,"\r\n",2);
+			//-----------------
 			//这是协议此功能没做
 			/*
 				POST /a.php? HTTP/1.1
@@ -511,8 +627,6 @@ _end:
 		free(p->body);
 		p->body=NULL;
 	}
-	free(p);
-	p=NULL;
 }
 
 void _zhHttpThread_Head(TzhHttpThread* p)
@@ -653,8 +767,6 @@ _end:
 		free(p->body);
 		p->body=NULL;
 	}
-	free(p);
-	p=NULL;
 }
 
 void zhHttpGetProtocolValue(const char*buf,const char*name,char*value)
