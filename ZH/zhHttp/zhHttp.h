@@ -9,8 +9,7 @@
 #ifndef __ZH__NET_HTTP_H__
 #define __ZH__NET_HTTP_H__
 
-#include "socket.h"
-#include "platform.h"
+#include "zhNet_Core/socket.h"
 
 #ifdef __cplusplus
 extern "C"{
