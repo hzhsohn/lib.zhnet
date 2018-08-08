@@ -74,10 +74,6 @@ int		zhPackWriteUnsignedInt(TzhPacket *p,unsigned int i);
 int		zhPackReadUnsignedInt(TzhPacket *p,unsigned int* i);
 int		zhPackWriteUnsignedLong(TzhPacket *p,unsigned long i);
 int		zhPackReadUnsignedLong(TzhPacket *p,unsigned long* i);
-int		zhPackWriteFloat(TzhPacket *p,float f);
-int		zhPackReadFloat(TzhPacket *p, float*f);
-int		zhPackWriteDouble(TzhPacket *p,double d);
-int		zhPackReadDouble(TzhPacket *p, double*d);
 
 #ifdef __cplusplus
 }

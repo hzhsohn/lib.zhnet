@@ -113,7 +113,7 @@ int zhPackWriteString(TzhPacket *p, char* str)
 
 	if(p->wPos+len>ZH_NET_PACKET_BODY_LENGTH){return 0;}
 
-	strcpy(&p->btBuf[p->wPos], str);
+	strcpy((char*)&p->btBuf[p->wPos], str);
 	p->btBuf[len + p->wPos] =0;
 	len += 1;
 	
@@ -145,8 +145,8 @@ int zhPackReadString(TzhPacket *p, char* str)
 {
 	size_t len=0;
 
-	len = strlen(&p->btBuf[p->wPos]);
-	strcpy(str, &p->btBuf[p->wPos]);
+	len = strlen((char*)&p->btBuf[p->wPos]);
+	strcpy(str, (char*)&p->btBuf[p->wPos]);
 	str[len] = 0;
 	len += 1;
 
@@ -187,118 +187,82 @@ int zhPackReadBinary(TzhPacket *p, char* str ,int len)
 }
 int zhPackWriteBool(TzhPacket *p,bool b)
 {
-	if(p->wPos+sizeof(bool)>ZH_NET_PACKET_BODY_LENGTH){return 0;}
-	RE_MEMORY(&b,sizeof(bool));
-	memcpy(&p->btBuf[p->wPos], &b, sizeof(bool));
-	p->wPos+=sizeof(bool);
-	p->wSize+=sizeof(bool);
-	return sizeof(bool);
+	char a=b?1:0;
+	if(p->wPos+1>ZH_NET_PACKET_BODY_LENGTH){return 0;}
+	memcpy(&p->btBuf[p->wPos], &a, 1);
+	p->wPos+=1;
+	p->wSize+=1;
+	return 1;
 }
 int zhPackReadBool(TzhPacket *p, bool*b)
 {
-	memcpy(b, &p->btBuf[p->wPos], sizeof(bool));
-	RE_MEMORY(b,sizeof(bool));
-	p->wPos+=sizeof(bool);
-	return sizeof(bool);
+	memcpy(b, &p->btBuf[p->wPos], 1);
+	p->wPos+=1;
+	return 1;
 }
 
 
 ////////////////////////////
 int zhPackWriteUnsignedChar(TzhPacket *p,unsigned char i)
 {
-	if(p->wPos+sizeof(unsigned char)>ZH_NET_PACKET_BODY_LENGTH){return 0;}
-	memcpy(&p->btBuf[p->wPos], &i, sizeof(unsigned char));
-	p->wPos+=sizeof(unsigned char);
-	p->wSize+=sizeof(unsigned char);
-	return sizeof(unsigned char);
+	if(p->wPos+1>ZH_NET_PACKET_BODY_LENGTH){return 0;}
+	memcpy(&p->btBuf[p->wPos], &i, 1);
+	p->wPos+=1;
+	p->wSize+=1;
+	return 1;
 }
 int zhPackReadUnsignedChar(TzhPacket *p,unsigned char* i)
 {
 	memcpy(i, &p->btBuf[p->wPos], sizeof(unsigned char));
-	p->wPos+=sizeof(unsigned char);
-	return sizeof(unsigned char);
+	p->wPos+=1;
+	return 1;
 }
 
 int zhPackWriteUnsignedShort(TzhPacket *p,unsigned short i)
 {
-	if(p->wPos+sizeof(unsigned short)>ZH_NET_PACKET_BODY_LENGTH){return 0;}
-	RE_MEMORY(&i,sizeof(unsigned short));
-	memcpy(&p->btBuf[p->wPos], &i, sizeof(unsigned short));
-	p->wPos+=sizeof(unsigned short);
-	p->wSize+=sizeof(unsigned short);
-	return sizeof(unsigned short);
+	if(p->wPos+2>ZH_NET_PACKET_BODY_LENGTH){return 0;}
+	RE_MEMORY(&i,2);
+	memcpy(&p->btBuf[p->wPos], &i, 2);
+	p->wPos+=2;
+	p->wSize+=2;
+	return 2;
 }
 int zhPackReadUnsignedShort(TzhPacket *p,unsigned short* i)
 {
-	memcpy(i, &p->btBuf[p->wPos], sizeof(unsigned short));
-	RE_MEMORY(i,sizeof(unsigned short));
-	p->wPos+=sizeof(unsigned short);
-	return sizeof(unsigned short);
+	memcpy(i, &p->btBuf[p->wPos], 2);
+	RE_MEMORY(i,2);
+	p->wPos+=2;
+	return 2;
 }
 int zhPackWriteUnsignedInt(TzhPacket *p,unsigned int i)
 {
-	if(p->wPos+sizeof(unsigned int)>ZH_NET_PACKET_BODY_LENGTH){return 0;}
-	RE_MEMORY(&i,sizeof(unsigned int));
-	memcpy(&p->btBuf[p->wPos], &i, sizeof(unsigned int));
-	p->wPos+=sizeof(unsigned int);
-	p->wSize+=sizeof(unsigned int);
-	return sizeof(unsigned int);
+	if(p->wPos+4>ZH_NET_PACKET_BODY_LENGTH){return 0;}
+	RE_MEMORY(&i,4);
+	memcpy(&p->btBuf[p->wPos], &i, 4);
+	p->wPos+=4;
+	p->wSize+=4;
+	return 4;
 }
 int zhPackReadUnsignedInt(TzhPacket *p,unsigned int* i)
 {
-	memcpy(i, &p->btBuf[p->wPos], sizeof(unsigned int));
-	RE_MEMORY(i,sizeof(unsigned int));
-	p->wPos+=sizeof(unsigned int);
-	return sizeof(unsigned int);
+	memcpy(i, &p->btBuf[p->wPos], 4);
+	RE_MEMORY(i,4);
+	p->wPos+=4;
+	return 4;
 }
 int zhPackWriteUnsignedLong(TzhPacket *p,unsigned long i)
 {
-	if(p->wPos+sizeof(unsigned long)>ZH_NET_PACKET_BODY_LENGTH){return 0;}
-	RE_MEMORY(&i,sizeof(unsigned long));
-	memcpy(&p->btBuf[p->wPos], &i, sizeof(unsigned long));
-	p->wPos+=sizeof(unsigned long);
-	p->wSize+=sizeof(unsigned long);
-	return sizeof(unsigned long);
+	if(p->wPos+8>ZH_NET_PACKET_BODY_LENGTH){return 0;}
+	RE_MEMORY(&i,8);
+	memcpy(&p->btBuf[p->wPos], &i, 8);
+	p->wPos+=8;
+	p->wSize+=8;
+	return 8;
 }
 int zhPackReadUnsignedLong(TzhPacket *p,unsigned long* i)
 {
-	memcpy(i, &p->btBuf[p->wPos], sizeof(unsigned long));
-	RE_MEMORY(i,sizeof(unsigned long));
-	p->wPos+=sizeof(unsigned long);
-	return sizeof(unsigned long);
-}
-
-
-int zhPackWriteFloat(TzhPacket *p,float f)
-{
-	if(p->wPos+sizeof(float)>ZH_NET_PACKET_BODY_LENGTH){return 0;}
-	RE_MEMORY(&f,sizeof(float));
-	memcpy(&p->btBuf[p->wPos], &f, sizeof(float));
-	p->wPos+=sizeof(float);
-	p->wSize+=sizeof(float);
-	return sizeof(float);
-}
-int zhPackReadFloat(TzhPacket *p, float*f)
-{
-	memcpy(f, &p->btBuf[p->wPos], sizeof(float));
-	RE_MEMORY(f,sizeof(float));
-	p->wPos+=sizeof(float);
-	return sizeof(float);
-}
-
-int zhPackWriteDouble(TzhPacket *p,double d)
-{
-	if(p->wPos+sizeof(double)>ZH_NET_PACKET_BODY_LENGTH){return 0;}
-	RE_MEMORY(&d,sizeof(double));
-	memcpy(&p->btBuf[p->wPos], &d, sizeof(double));
-	p->wPos+=sizeof(double);
-	p->wSize+=sizeof(double);
-	return sizeof(double);
-}
-int zhPackReadDouble(TzhPacket *p, double*d)
-{
-	memcpy(d, &p->btBuf[p->wPos], sizeof(double));
-	RE_MEMORY(d,sizeof(double));
-	p->wPos+=sizeof(double);
-	return sizeof(double);
+	memcpy(i, &p->btBuf[p->wPos], 8);
+	RE_MEMORY(i,8);
+	p->wPos+=8;
+	return 8;
 }
