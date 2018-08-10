@@ -300,7 +300,7 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 			//�ύHTTPͷ
 			char buf[2048]={0};
 			char tmp[256];
-			sprintf(tmp,"GET %s?%s HTTP/1.1\r\n",p->file,p->parameter);
+			sprintf(tmp,"GET /%s?%s HTTP/1.1\r\n",p->file,p->parameter);
 			strcat(buf,tmp);
 			sprintf(tmp,"Accept: */*\r\n");
 			strcat(buf,tmp);
@@ -331,11 +331,11 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 
 			if(p->parameter[0])
 				{
-					sprintf(tmp,"POST %s?%s HTTP/1.1\r\n",p->file,p->parameter);
+					sprintf(tmp,"POST /%s?%s HTTP/1.1\r\n",p->file,p->parameter);
 				}
 				else
 				{
-					sprintf(tmp,"POST %s HTTP/1.1\r\n",p->file);
+					sprintf(tmp,"POST /%s HTTP/1.1\r\n",p->file);
 				}
 			strcat(buf,tmp);
 			sprintf(tmp,"Accept: */*\r\n");
@@ -401,11 +401,11 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 
 				if(p->parameter[0])
 				{
-					sprintf(tmp,"POST %s?%s HTTP/1.1\r\n",p->file,p->parameter);
+					sprintf(tmp,"POST /%s?%s HTTP/1.1\r\n",p->file,p->parameter);
 				}
 				else
 				{
-					sprintf(tmp,"POST %s HTTP/1.1\r\n",p->file);
+					sprintf(tmp,"POST /%s HTTP/1.1\r\n",p->file);
 				}
 				zhSockSend(p->s,tmp,strlen(tmp));
 				sprintf(tmp,"Accept: */*\r\n");
@@ -662,7 +662,7 @@ void _zhHttpThread_Head(TzhHttpThread* p)
 			char buf[2048]={0};
 			char tmp[256];
 
-			sprintf(tmp,"HEAD %s HTTP/1.1\r\n",p->file);
+			sprintf(tmp,"HEAD /%s HTTP/1.1\r\n",p->file);
 			strcat(buf,tmp);
 			sprintf(tmp,"Accept: */*\r\n");
 			strcat(buf,tmp);
