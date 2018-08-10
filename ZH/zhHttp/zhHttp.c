@@ -514,6 +514,7 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 	memset(cache_buf,0,sizeof(cache_buf));
 	while(1)
 	{
+		bool jmp=false;
 		//这里接收的是cache的缓冲区大小
 		recv_len=zhSockRecv(p->s,recv_buf,sizeof(recv_buf));
 		if(recv_len>0)
@@ -531,7 +532,6 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 			search_len=0;
 			while(pSearch[0]!=0)
 			{
-				bool jmp=false;
 				pSearch++;
 				search_len++;
 				//数据正常
@@ -580,6 +580,10 @@ void _zhHttpThread_Data(TzhHttpThread* p)
 		}
 		else if(-1==recv_len)
 		{
+			if(false==jmp)
+			{
+				p->pfCallback(ezhHttpOperatGetData,p->host,p->port,p->file,p->parameter,p->body,p->body_len,cache_buf,cache_len);
+			}
 			p->pfCallback(ezhHttpOperatFinish,p->host,p->port,p->file,p->parameter,p->body,p->body_len,NULL,0);
 			goto _end;
 		}
