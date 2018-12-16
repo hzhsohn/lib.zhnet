@@ -4,6 +4,7 @@
 TzhNetSession user;
 TzhPacket pack;
 DWORD dwKeepTime=0;
+DWORD dwReconnectTime=0;
 
 void NetKeepTime(TzhNetSession*sion);
 void zhConnect(TzhNetSession*sion,void*info,bool bResult);
@@ -33,6 +34,21 @@ void NetKeepTime(TzhNetSession*sion)
             dwKeepTime=dwTmp;
 		}
 	}
+	
+	//断开重连
+	if(ezhNetStateZero==sion->cState)
+	{
+		//5秒重新连接
+		dwTmp=zhPlatGetTime();
+		if(dwTmp - dwReconnectTime>5000)
+		{
+			//初始化网络
+			zhSionInit(&user,0);
+			zhSionConnect(&user,"localhost",7666);
+			//
+      dwReconnectTime=dwTmp;
+		}
+	}
 }
 
 void zhConnect(TzhNetSession*sion,void*info,bool bResult)
@@ -60,6 +76,7 @@ void zhRecv(TzhNetSession*sion,void*info,unsigned char*szBuf,int nLen)
 void zhDisconnect(TzhNetSession*sion,void*info)
 {
 	PRINTF("%s,Disconnect..! socket=%d",info,sion->s);
+	dwReconnectTime=0;
 }
 
 void zhError(TzhNetSession*sion,void* info,EzhNetError err)
