@@ -21,9 +21,6 @@
     <ClCompile Include="main.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\udpprocess.c">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\encrypt.c">
       <Filter>lib</Filter>
     </ClCompile>
@@ -45,9 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\socket.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\udpprocess.h">
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\encrypt.h">

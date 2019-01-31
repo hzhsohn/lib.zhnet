@@ -1,4 +1,5 @@
-#include "udpprocess.h"
+#include "socket.h"
+#include "packet.h"
 
 SOCKET s1,s2;
 
@@ -11,7 +12,7 @@ void recvpack(struct sockaddr_in *addr,TzhPacket *pack)
 	
 	zhPackReadInt(pack,&i);
 	zhPackReadString(pack,buf);
-	zhUdpAddrToPram(addr,ip,&port);
+	zhSockAddrToPram(addr,ip,&port);
 	printf("%s:%d->%d %s\n",ip,port,i,buf);
 }
 
@@ -26,7 +27,7 @@ void udpThread()
 	while(true)
 	{
 		Sleep(1);
-		ret=zhUdpRecvFrom(s1,recvbuf,sizeof(recvbuf),&addr,&addrlen);
+		ret=zhSockRecvFrom(s1,recvbuf,sizeof(recvbuf),&addr,&addrlen);
 		if(ret>0)
 		{
 			zhPackReadInit(&pack,recvbuf,ret);
@@ -62,8 +63,8 @@ int main()
 		zhPackWriteInit(&pack);
 		zhPackWriteInt(&pack,i);
 		zhPackWriteString(&pack,"細細込込込込");
-		zhUdpPramToAddr("127.0.0.1",2329,&addr);
-		zhUdpSendToPack(s1,&pack,&addr);
+		zhSockPramToAddr("127.0.0.1",2329,&addr);
+		zhSockSendTo(s1,pack.btBuf,pack.wSize,&addr);
 		Sleep(500);
 	}
 	return 0;

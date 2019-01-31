@@ -104,7 +104,6 @@
     <ClCompile Include="..\..\platform.c" />
     <ClCompile Include="..\..\session.c" />
     <ClCompile Include="..\..\socket.c" />
-    <ClCompile Include="..\..\udpprocess.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
@@ -115,7 +114,6 @@
     <ClInclude Include="..\..\platform.h" />
     <ClInclude Include="..\..\session.h" />
     <ClInclude Include="..\..\socket.h" />
-    <ClInclude Include="..\..\udpprocess.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

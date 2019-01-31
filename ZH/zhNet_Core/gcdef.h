@@ -44,8 +44,10 @@ typedef struct _TzhPackFrameHeader
  *包的类型,EzhPackType结构休
 */
 	unsigned char    yFrameFlag;	//固定 ZH_NET_FRAME_FLAG
-	unsigned short	wDataLen;   //后随的包体的长度
-	unsigned short	wCRC16;     //包体的CRC校检,当包长度为0时CRC校检值为0
+	unsigned char	wDataLenL1;   //后随的包体的长度
+	unsigned char	wDataLenL2;   //后随的包体的长度第二字节
+	unsigned char	wCRC16L1;     //包体的CRC校检,当包长度为0时CRC校检值为0
+	unsigned char	wCRC16L2;     //包体的CRC校检,当包长度为0时CRC校检值为0,第二字节
 }TzhPackFrameHeader;
 
 /*

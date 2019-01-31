@@ -27,9 +27,6 @@
     <ClCompile Include="..\..\socket.c">
       <Filter>lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\udpprocess.c">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\packet.c">
       <Filter>lib</Filter>
     </ClCompile>
@@ -38,9 +35,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\udpprocess.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\platform.h">
       <Filter>lib</Filter>
     </ClInclude>

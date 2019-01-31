@@ -63,7 +63,7 @@ bool zhNetEncrypt(bool isNeedEncrypt,char* buf, int len,unsigned int nEncryptKey
 		for(i=0; i<len; i++)
 		{
 			nEncryptKey += i*GCHMAC_KEY_CHANGE;
-			memcpy(yar, &nEncryptKey, sizeof(int));
+			memcpy(yar, &nEncryptKey, 4);
 			for(j=0; j<4; j++)
 			{
 				buf[i] = buf[i]^yar[j];
@@ -87,7 +87,7 @@ bool zhNetDecrypt(bool isNeedEncrypt,char* buf, int len,unsigned int nEncryptKey
 		for(i=0; i<len; i++)
 		{
 			nEncryptKey += i*GCHMAC_KEY_CHANGE;
-			memcpy(yar, &nEncryptKey, sizeof(int));	
+			memcpy(yar, &nEncryptKey, 4);	
 			for(j=3; j>=0; j--)
 			{
 				buf[i] = buf[i]^yar[j];

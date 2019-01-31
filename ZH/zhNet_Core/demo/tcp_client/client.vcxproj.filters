@@ -33,9 +33,6 @@
     <ClCompile Include="..\..\socket.c">
       <Filter>lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\udpprocess.c">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\encrypt.c">
       <Filter>lib</Filter>
     </ClCompile>
@@ -57,9 +54,6 @@
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\socket.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\udpprocess.h">
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\encrypt.h">

@@ -107,6 +107,7 @@ bool zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
 	TzhPackFrameHeader pktHeader={0};
 	unsigned char* sendBuf=NULL;
 	bool ret;
+	unsigned short tmp=0;
 
 	if(ezhNetStateDead==sion->cState || ezhNetStateZero==sion->cState)
 	{
@@ -128,19 +129,17 @@ bool zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
 	//++++++++++++++++++
 	//包头数据
 	pktHeader.yFrameFlag=ZH_NET_FRAME_FLAG;
-	pktHeader.wDataLen=nLen;
-	pktHeader.wCRC16=zhPlatCRC16((unsigned char*)szPack,nLen);
-
-	//反转CPU处理顺序
-	//RE_MEMORY(&pktHeader.yFrameFlag,sizeof(pktHeader.yFrameFlag));
-	//RE_MEMORY(&pktHeader.yPackType,sizeof(pktHeader.yPackType));
-	RE_MEMORY(&pktHeader.wDataLen,sizeof(pktHeader.wDataLen));
-	RE_MEMORY(&pktHeader.wCRC16,sizeof(pktHeader.wCRC16));
+	pktHeader.wDataLenL1=nLen&0xFF;
+	pktHeader.wDataLenL2=nLen>>8;
+	tmp=zhPlatCRC16((unsigned char*)szPack,nLen);
+	pktHeader.wCRC16L1=tmp&0xFF;
+	pktHeader.wCRC16L2=tmp>>8;
 
 	//-----------------
 	memcpy(sendBuf,&pktHeader,sizeof(TzhPackFrameHeader));
 	memcpy(&sendBuf[sizeof(TzhPackFrameHeader)],szPack,nLen);
 
+	//zhPlatPrint16(4,&sion->nEncryptKey);
 	//Encrypt Key
 	zhNetEncrypt(sion->isStartupVariableFlowEncrypt,(char*)sendBuf,sizeof(TzhPackFrameHeader),sion->nEncryptKey);//帧头
 	zhNetEncrypt(sion->isStartupVariableFlowEncrypt,(char*)&sendBuf[sizeof(TzhPackFrameHeader)],nLen,sion->nEncryptKey);//包体
@@ -238,8 +237,11 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
 				{
 					if(sion->tagPack.wNetPackPos>=4)//4个字节加密信息
 					{
-							sion->nEncryptKey=0;
-							memcpy(&sion->nEncryptKey,&szTmpBuf[0],4);
+							sion->nEncryptKey=szTmpBuf[0]		|
+											  szTmpBuf[1]<<8	|
+											  szTmpBuf[2]<<16	|
+											  szTmpBuf[3]<<24;
+							//zhPlatPrint16(4,&sion->nEncryptKey);
 							if(0==sion->nEncryptKey)//加密信息不0为即是变流加密
 							{
 								sion->isStartupVariableFlowEncrypt=false;
@@ -247,7 +249,6 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
 							else{
 								sion->isStartupVariableFlowEncrypt=true;
 							}
-							RE_MEMORY(&sion->nEncryptKey,sizeof(sion->nEncryptKey));
 							ZH_NET_DEBUG_PRINTF("Get Encrypt GetKey=%d !!",sion->nEncryptKey);
 							sion->cState=ezhNetStateConnecting;
 				
@@ -282,19 +283,17 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 		if(sion->tagPack.wNetPackPos>=sizeof(TzhPackFrameHeader))
 		{
 			TzhPackFrameHeader packetHeader;
+			unsigned short wDataLen=0,wCRC16=0;
 			memcpy(&packetHeader,sion->tagPack.btCache,sizeof(TzhPackFrameHeader));
+			//zhPlatPrint16(4,&sion->nEncryptKey);
 			//解密包头
-			zhNetDecrypt(sion->isStartupVariableFlowEncrypt,(char*)&packetHeader,sizeof(TzhPackFrameHeader),sion->nEncryptKey);
-
+			zhNetDecrypt(sion->isStartupVariableFlowEncrypt,(char*)&packetHeader,sizeof(TzhPackFrameHeader),sion->nEncryptKey);			
+			//
+			wDataLen=packetHeader.wDataLenL1|packetHeader.wDataLenL2<<8;
+			wCRC16=packetHeader.wCRC16L1|packetHeader.wCRC16L2<<8;
 			//++++++++++++++++++++++++处理整个包头+++++++++++++++++++++++++++++++++++++++++
 			if(false==sion->tagPack.bNetPackRecvBuf)
 			{
-				//处理CPU顺序
-				//RE_MEMORY(&packetHeader.yFrameFlag,sizeof(packetHeader.yFrameFlag));
-				//RE_MEMORY(&packetHeader.yPackType,sizeof(packetHeader.yPackType));
-				RE_MEMORY(&packetHeader.wDataLen,sizeof(packetHeader.wDataLen));
-				RE_MEMORY(&packetHeader.wCRC16,sizeof(packetHeader.wCRC16));
-
 				//错误包断开
 				if(packetHeader.yFrameFlag !=ZH_NET_FRAME_FLAG)
 				{
@@ -317,7 +316,7 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 					}
 
 					ZH_NET_DEBUG_PRINTF("Packet Error->Socket=%d , wDataLen=%d",
-							sion->s,packetHeader.wDataLen);
+							sion->s,wDataLen);
 					
 					*err=ezhNetErrorPacketInvalid;
 					return -1;
@@ -332,26 +331,26 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 			{
 				unsigned short wCRCTmp;
 				//++++++++++++++++++++++++处理整个完整包+++++++++++++++++++++++++++++++++++++++++
-    			nTmpPos1=sizeof(TzhPackFrameHeader)+packetHeader.wDataLen;
+    			nTmpPos1=sizeof(TzhPackFrameHeader)+wDataLen;
     			if(sion->tagPack.wNetPackPos >=nTmpPos1)
     			{
 					unsigned char* tmpFrame;
 					tmpFrame=(unsigned char*)malloc(nTmpPos1);//新建一个帧
 					memcpy(tmpFrame,&packetHeader,sizeof(TzhPackFrameHeader));
-					memcpy(&tmpFrame[sizeof(TzhPackFrameHeader)],&sion->tagPack.btCache[sizeof(TzhPackFrameHeader)],packetHeader.wDataLen);
+					memcpy(&tmpFrame[sizeof(TzhPackFrameHeader)],&sion->tagPack.btCache[sizeof(TzhPackFrameHeader)],wDataLen);
 					//解密整帧
 					zhNetDecrypt(sion->isStartupVariableFlowEncrypt,
 								(char*)&tmpFrame[sizeof(TzhPackFrameHeader)],
-								packetHeader.wDataLen,
+								wDataLen,
 								sion->nEncryptKey);
 					
 					//数据包处理----------------------
 					wCRCTmp=zhPlatCRC16(&tmpFrame[sizeof(TzhPackFrameHeader)],
-											packetHeader.wDataLen);
-					if(wCRCTmp==packetHeader.wCRC16)
+											wDataLen);
+					if(wCRCTmp==wCRC16)
 					{
-							memcpy(frame,&tmpFrame[sizeof(TzhPackFrameHeader)],packetHeader.wDataLen);
-							nRet=packetHeader.wDataLen;
+							memcpy(frame,&tmpFrame[sizeof(TzhPackFrameHeader)],wDataLen);
+							nRet=wDataLen;
 
 							//释放临时帧
 							free(tmpFrame);
@@ -377,7 +376,7 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 							memmove(sion->tagPack.btCache,&sion->tagPack.btCache[findPos],sion->tagPack.wNetPackPos);
 						}
 
-						ZH_NET_DEBUG_PRINTF("CRC16 error wCRCTmp=%d , Frame->header.wCRC16=%d",wCRCTmp,packetHeader.wCRC16);
+						ZH_NET_DEBUG_PRINTF("CRC16 error wCRCTmp=%d , Frame->header.wCRC16=%d",wCRCTmp,wCRC16);
 						//CRC校验出错
 						*err=ezhNetErrorCRC16;
 
@@ -474,8 +473,8 @@ EzhNetEvent zhSionStateThread(TzhNetSession*sion)
 	case ezhNetStateWaitSeed:
 		{
 			//超时提示
-			time_t dwTmp;
-			time_t nTmp;
+			unsigned long dwTmp;
+			unsigned long nTmp;
 			dwTmp=zhPlatGetTime();
 			nTmp=dwTmp-sion->dwStartTime;
 			if(zhSockHasExcept(sion->s,0,0) || nTmp>ZH_NET_CONNECT_TIMEOUT)
@@ -539,20 +538,23 @@ bool zhSionRemoteAddr(TzhNetSession *sion,char *addr,unsigned short *port,unsign
 //发送种子钥匙
 void _zhSionSendKeyEncrypt(TzhNetSession *sion)
 {
-	char sendbuf[4];
+	char sendbuf[4]={0};
 	unsigned int nEncryptKey;
 
 	//固定发送4个字节	
 	if(sion->isStartupVariableFlowEncrypt)
 	{
-		nEncryptKey=zhNetGetRandEncryptKey();
-		RE_MEMORY(&nEncryptKey,sizeof(int));
+		nEncryptKey=zhNetGetRandEncryptKey();		
 	}
 	else
 	{
 		nEncryptKey=0;
 	}
-	memcpy(&sendbuf,&nEncryptKey,4);
+	//zhPlatPrint16(4,&nEncryptKey);
+	sendbuf[0]=nEncryptKey&0xFF;
+	sendbuf[1]=nEncryptKey>>8&0xFF;
+	sendbuf[2]=nEncryptKey>>16&0xFF;
+	sendbuf[3]=nEncryptKey>>24&0xFF;
 
 	if(zhSionInsertSendList(sion,sendbuf,4))
 	{sion->cState=ezhNetStateConnected;}

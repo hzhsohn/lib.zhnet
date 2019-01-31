@@ -1,4 +1,4 @@
-#include "udpprocess.h"
+#include "socket.h"
 #include "packet.h"
 
 SOCKET s1;
@@ -12,13 +12,13 @@ void recvpack(struct sockaddr_in *addr,TzhPacket *pack)
 	
 	zhPackReadInt(pack,&i);
 	zhPackReadString(pack,buf);
-	zhUdpAddrToPram(addr,ip,&port);
+	zhSockAddrToPram(addr,ip,&port);
 	printf("%s:%d->%d %s len=%d\n",ip,port,i,buf,pack->wSize);
 	
 	zhPackWriteInit(pack);
 	zhPackWriteInt(pack,i);
 	zhPackWriteString(pack,"ÊÕµ½ÁË");
-	zhUdpSendToPack(s1,pack,addr);
+	zhSockSendTo(s1,pack->btBuf,pack->wSize,addr);
 }
 
 void udpThread()
@@ -31,7 +31,7 @@ void udpThread()
 	while(true)
 	{
 		Sleep(1);
-		ret=zhUdpRecvFrom(s1,recvbuf,sizeof(recvbuf),&addr,&addrlen);
+		ret=zhSockRecvFrom(s1,recvbuf,sizeof(recvbuf),&addr,&addrlen);
 		if(ret>0)
 		{
 			zhPackReadInit(&pack,recvbuf,ret);

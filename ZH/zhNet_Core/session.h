@@ -196,7 +196,7 @@ typedef struct _TzhNetSession
 	 *
 	 *开始连接的时间
 	*/
-	time_t		dwStartTime;
+	unsigned long		dwStartTime;
 
 	/*
 	 *stick packet processing

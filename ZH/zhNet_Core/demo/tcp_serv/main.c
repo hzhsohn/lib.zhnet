@@ -14,8 +14,8 @@ int main(int argc,char *argv[])
 	int ret;
 	TzhNetSession tmpUser;
 	
-	//初始化网络
-	ret=zhSionStartup(&g_listern,2323,false);
+	//初始化网络,加密通讯
+	ret=zhSionStartup(&g_listern,2323,true);
 	if(ret)
 	{
 		PRINTF("Startup Server ok..!!");
