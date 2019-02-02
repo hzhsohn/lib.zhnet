@@ -160,7 +160,6 @@ typedef struct _TzhNetListen
 	 *
 	 *加密钥匙和加密类型
 	*/
-	unsigned int			nEncryptKey;
 	bool		isStartupVariableFlowEncrypt;
 }TzhNetListen;
 
@@ -181,7 +180,7 @@ typedef struct _TzhNetSession
 	 *
 	 *加密钥匙和加密类型
 	*/
-	unsigned int			nEncryptKey;
+	unsigned char		nEncryptKey[4];
 	bool		isStartupVariableFlowEncrypt;
 	
 	/*

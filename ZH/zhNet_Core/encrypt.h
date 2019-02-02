@@ -35,13 +35,13 @@ extern "C"{
 //
 //初始始化随机钥匙
 //
-unsigned int zhNetGetRandEncryptKey();
+int zhNetGetRandEncryptKey();
 
 //
 //sub function,using in this moudle
 //
-bool zhNetEncrypt(bool isNeedEncrypt,char* buf, int len,unsigned int nEncryptKey);
-bool zhNetDecrypt(bool isNeedEncrypt,char* buf, int len,unsigned int nEncryptKey);
+bool zhNetEncrypt(bool isNeedEncrypt,char* buf, int len,unsigned char nEncryptKey[4]);
+bool zhNetDecrypt(bool isNeedEncrypt,char* buf, int len,unsigned char nEncryptKey[4]);
 
 #ifdef __cplusplus
 }

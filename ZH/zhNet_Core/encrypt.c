@@ -21,29 +21,21 @@ rights reserved.
 #include "encrypt.h"
 
 //
-//Self-defined changes in the encrypted sequence
-//
-//自定义加密的变化序列
-//
-#define GCHMAC_KEY_CHANGE		37
-
-
-//
 //Initial start random key
 //
 //初始始化随机钥匙
 //
-unsigned int zhNetGetRandEncryptKey()
+int zhNetGetRandEncryptKey()
 {
 	time_t dw;
 	int ret;
 	dw=zhPlatGetTime();
-	srand((unsigned int)dw);
+	srand((int)dw);
 	ret=rand();
 	while(ret == 0)
 	{
 		dw=zhPlatGetTime();
-		srand((unsigned int)dw);
+		srand((int)dw);
 		ret = rand();
 	}
 	return ret;
@@ -53,20 +45,16 @@ unsigned int zhNetGetRandEncryptKey()
 //sub function,using in this moudle
 //function for encrypt data
 //
-bool zhNetEncrypt(bool isNeedEncrypt,char* buf, int len,unsigned int nEncryptKey)
+bool zhNetEncrypt(bool isNeedEncrypt,char* buf, int len,unsigned char nEncryptKey[4])
 {
 	if(isNeedEncrypt)
 	{
 		int i,j;
-		unsigned char yar[4];
-
 		for(i=0; i<len; i++)
 		{
-			nEncryptKey += i*GCHMAC_KEY_CHANGE;
-			memcpy(yar, &nEncryptKey, 4);
 			for(j=0; j<4; j++)
 			{
-				buf[i] = buf[i]^yar[j];
+				buf[i] = buf[i]^nEncryptKey[j];
 			}
 		}
 	}
@@ -77,20 +65,16 @@ bool zhNetEncrypt(bool isNeedEncrypt,char* buf, int len,unsigned int nEncryptKey
 //sub function,using in this moudle
 //decrypt data
 //
-bool zhNetDecrypt(bool isNeedEncrypt,char* buf, int len,unsigned int nEncryptKey)
+bool zhNetDecrypt(bool isNeedEncrypt,char* buf, int len,unsigned char nEncryptKey[4])
 {
 	if(isNeedEncrypt)
 	{
 		int i,j;
-		unsigned char yar[4];
-
 		for(i=0; i<len; i++)
 		{
-			nEncryptKey += i*GCHMAC_KEY_CHANGE;
-			memcpy(yar, &nEncryptKey, 4);	
 			for(j=3; j>=0; j--)
 			{
-				buf[i] = buf[i]^yar[j];
+				buf[i] = buf[i]^nEncryptKey[j];
 			}
 		}
 	}
