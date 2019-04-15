@@ -61,7 +61,7 @@ typedef struct _TzhPackFrameHeader
  *
  *每次发包的最大长度，不包括包头
 */
-#define ZH_NET_PACKET_BODY_LENGTH			1048			
+#define ZH_NET_PACKET_BODY_LENGTH			2000			
 			
 //End---------->
 
