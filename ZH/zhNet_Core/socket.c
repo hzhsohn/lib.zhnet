@@ -370,7 +370,7 @@ void zhSockReset(SOCKET* s)
 bool zhSockSetNonBlocking(SOCKET s,bool bSetBlock)
 {
 	/* set to nonblocking mode */
-	u_long arg;
+	unsigned long arg;
 	arg=bSetBlock?1:0;
 	if (IOCTLSOCKET(s,FIONBIO,&arg)==SOCKET_ERROR)
 	{

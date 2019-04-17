@@ -19,7 +19,6 @@ bool zhSionInit(TzhNetSession *sion,unsigned short wBindPort)
 	if(!zhSockInit(&sion->s,ZH_SOCK_TCP)){return false;}
     if(!zhSockSetNonBlocking(sion->s,true)){ZH_NET_DEBUG_PRINTF("SetNonBlocking Fail..!!");return false;}
 	
-	INIT_CS(&sion->csSendData);
 	sion->pInfo=NULL;
 	sion->cState=ezhNetStateInitizal;
 	sion->isStartupVariableFlowEncrypt=false;
@@ -27,7 +26,7 @@ bool zhSionInit(TzhNetSession *sion,unsigned short wBindPort)
 	sion->isAlreadyGetEncryptSeed=false;
 
 	if(wBindPort>0)
-	{	
+	{
         if(!zhSockSetReuseAddr(sion->s,true)){ZH_NET_DEBUG_PRINTF("Reuse Addr Fail..!!");return false;}
         if(!zhSockBindAddr(sion->s,NULL,wBindPort)){return false;}
     }
@@ -48,10 +47,8 @@ bool zhSionConnect(TzhNetSession *sion,char*szIp,unsigned short wRemotoPort)
 	sion->dwStartTime=zhPlatGetTime();
 	
 	sion->tagPack.bNetPackRecvBuf=false;
+	sion->tagPack.btCache=(unsigned char*)malloc(ZH_NET_PACKET_SIZE);
 	sion->tagPack.wNetPackPos=0;
-	sion->sendDataList=NULL;
-	sion->pSendDataList_last=NULL;
-	sion->sendDataListCount=0;
 	sion->isAlreadyGetEncryptSeed=false;
 	return true;
 }
@@ -72,12 +69,8 @@ bool zhSionAccept(TzhNetListen* lisn,TzhNetSession *sion)
 		sion->pInfo=NULL;
 
 		sion->tagPack.bNetPackRecvBuf=false;
+		sion->tagPack.btCache=(unsigned char*)malloc(ZH_NET_PACKET_SIZE);
 		sion->tagPack.wNetPackPos=0;
-		sion->sendDataList=NULL;
-		sion->pSendDataList_last=NULL;
-		sion->sendDataListCount=0;
-		INIT_CS(&sion->csSendData);
-
 		sion->cState=ezhNetStateInitizal;
 
 		//加密信息
@@ -97,20 +90,25 @@ bool zhSionSafeClose(TzhNetSession *sion)
         sion->cState=ezhNetStateDead;
         return true;
     }
+	if(sion->tagPack.btCache)
+	{
+		free(sion->tagPack.btCache);
+		sion->tagPack.btCache=NULL;
+	}
 	return false;
 }
 
-bool zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
+int zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
 {
 	int nSendLen=0;
 	TzhPackFrameHeader pktHeader={0};
 	unsigned char* sendBuf=NULL;
-	bool ret;
+	int ret;
 	unsigned short tmp=0;
 
 	if(ezhNetStateDead==sion->cState || ezhNetStateZero==sion->cState)
 	{
-		return false;
+		return -1;
 	}
 
 	/*
@@ -142,63 +140,16 @@ bool zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
 	//Encrypt Key
 	zhNetEncrypt(sion->isStartupVariableFlowEncrypt,(char*)sendBuf,nSendLen,sion->nEncryptKey);
 	//添加到发送列表
-	ret=zhSionInsertSendList(sion,(char*)sendBuf,nSendLen);
+	ret=zhSockSend(sion->s,(char*)sendBuf,nSendLen);
 	
 	free(sendBuf);
 	sendBuf=NULL;
 	return ret;
 }
 
-bool zhSionInsertSendList(TzhNetSession *sion,char* yBuf,int nLen)
+int zhSionSendPacket(TzhNetSession *sion,TzhPacket*pack)
 {
-	bool ret=true;
-
-	//添加到发送列表
-	LOCK_CS(&sion->csSendData);
-	if(NULL==sion->sendDataList)
-	{
-		sion->sendDataList=(TzhNetPacketList*)malloc(sizeof(TzhNetPacketList));
-		if(sion->sendDataList)
-		{
-			memset(sion->sendDataList,0,sizeof(TzhNetPacketList));
-			memcpy(sion->sendDataList->packet,yBuf,nLen);
-			sion->sendDataList->packet_len=nLen;
-			sion->pSendDataList_last=sion->sendDataList;
-		}
-		else
-		{
-			ret=false;
-		}
-	}
-	else
-	{
-		sion->pSendDataList_last->_next=(TzhNetPacketList*)malloc(sizeof(TzhNetPacketList));
-		if(sion->pSendDataList_last->_next)
-		{
-			memset(sion->pSendDataList_last->_next,0,sizeof(TzhNetPacketList));
-			memcpy(sion->pSendDataList_last->_next->packet,yBuf,nLen);
-			sion->pSendDataList_last->_next->packet_len=nLen;
-			sion->pSendDataList_last=sion->pSendDataList_last->_next;
-		}
-		else
-		{
-			ret=false;
-		}
-	}
-
-	sion->sendDataListCount++;
-	UNLOCK_CS(&sion->csSendData);
-	return ret;
-}
-
-bool zhSionSendPacket(TzhNetSession *sion,TzhPacket*pack)
-{
-	return zhSionSend(sion,(char*)pack->btBuf,pack->wSize);;
-}
-
-int zhSionGetSurplusSendCount(TzhNetSession *sion)
-{
-	return sion->sendDataListCount;
+	return zhSionSend(sion,(char*)pack->btBuf,pack->wSize);
 }
 
 bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
@@ -222,6 +173,7 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
 			if(sion->tagPack.wNetPackPos+nBufSize>=ZH_NET_PACKET_SIZE)
 			{
 				ZH_NET_DEBUG_PRINTF("Cache Waring Socket=%d , wNetPackPos=%d , nBufSize=%d",sion->s,sion->tagPack.wNetPackPos,nBufSize);
+				sion->tagPack.wNetPackPos=0;
 				*err=ezhNetErrorCacheOverflow;
 				return false;
 			}
@@ -282,7 +234,7 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
 	return true;
 }
 
-int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
+int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNetError* err)
 {
 		int nRet;
 		int nTmpPos1,nTmpPos2;
@@ -338,23 +290,23 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 				//++++++++++++++++++++++++处理整个完整包+++++++++++++++++++++++++++++++++++++++++
     			nTmpPos1=sizeof(TzhPackFrameHeader)+wDataLen;
     			if(sion->tagPack.wNetPackPos >=nTmpPos1)
-    			{
-					unsigned char* tmpFrame;
-					tmpFrame=(unsigned char*)malloc(nTmpPos1);//新建一个帧
-					memcpy(tmpFrame,&packetHeader,sizeof(TzhPackFrameHeader));
-					memcpy(&tmpFrame[sizeof(TzhPackFrameHeader)],&sion->tagPack.btCache[sizeof(TzhPackFrameHeader)],wDataLen);
-					
+    			{					
 					//数据包处理----------------------
-					wCRCTmp=zhPlatCRC16(&tmpFrame[sizeof(TzhPackFrameHeader)],
+					wCRCTmp=zhPlatCRC16(&sion->tagPack.btCache[sizeof(TzhPackFrameHeader)],
 											wDataLen);
 					if(wCRCTmp==wCRC16)
 					{
-							memcpy(frame,&tmpFrame[sizeof(TzhPackFrameHeader)],wDataLen);
-							nRet=wDataLen;
-
-							//释放临时帧
-							free(tmpFrame);
-							tmpFrame=NULL;
+							if(wDataLen <= frame_len)
+							{
+								memcpy(frame,&sion->tagPack.btCache[sizeof(TzhPackFrameHeader)],wDataLen);
+								nRet=wDataLen;
+							}
+							else
+							{
+								sion->tagPack.wNetPackPos=0; //复位所有接收过的数据
+								*err=ezhNetErrorCacheNotEnough;
+								return -1;
+							}
 					}
 					else
 					{
@@ -362,7 +314,7 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 						unsigned char*pPacket;
 						
 						//寻找包开始的字节
-						pPacket=tmpFrame;
+						pPacket=sion->tagPack.btCache;
 						findPos=sizeof(packetHeader.yFrameFlag);
 						while(findPos<sion->tagPack.wNetPackPos)
 						{
@@ -380,9 +332,6 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 						//CRC校验出错
 						*err=ezhNetErrorCRC16;
 
-						//释放临时帧
-						free(tmpFrame);
-						tmpFrame=NULL;
 						return -1;
 					}
 					//----------------------------------
@@ -391,7 +340,7 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 					if(nTmpPos2>=0)
 					{
 						if(nTmpPos2>0)
-    					memmove(sion->tagPack.btCache,&sion->tagPack.btCache[nTmpPos1],nTmpPos2);
+						{memmove(sion->tagPack.btCache,&sion->tagPack.btCache[nTmpPos1],nTmpPos2);}
     					sion->tagPack.wNetPackPos=nTmpPos2;
 					}
     				sion->tagPack.bNetPackRecvBuf=false;
@@ -421,52 +370,6 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err)
 EzhNetEvent zhSionStateThread(TzhNetSession*sion)
 {
 	//--------------------------------------------
-	//发送列表处理
-	TzhNetPacketList *p1,*p2;
-	int ret;
-
-	if(ezhNetStateZero!=sion->cState)
-	{
-		LOCK_CS(&sion->csSendData);
-		p1 = sion->sendDataList;
-		while(p1 != NULL)
-		{
-			p2 = p1->_next;
-			ret=p1->packet_len - p1->send_pos;
-			if(ret<=0)
-			{
-				//数据存在问题
-				p1->packet_len=0;
-				p1->send_pos=0;
-				ret=0;
-			}
-			else
-			{
-				ret=zhSockSend(sion->s, &p1->packet[p1->send_pos] , ret);
-			}
-			if(ret>0 || 0==p1->packet_len)
-			{
-				p1->send_pos+=ret;
-				if(p1->send_pos==p1->packet_len)
-				{
-					free (p1);
-					p1 = p2;
-					//发送完毕
-					sion->sendDataListCount--;
-					sion->sendDataList=p1;
-					if(NULL==sion->sendDataList)
-					{sion->pSendDataList_last=NULL;}
-				}
-			}
-			else
-			{
-				
-				break;
-			}
-		}
-		UNLOCK_CS(&sion->csSendData);
-	}
-	//--------------------------------------------
 	//状态处理
 	switch(sion->cState)
 	{
@@ -493,27 +396,19 @@ EzhNetEvent zhSionStateThread(TzhNetSession*sion)
 		break;
 	case ezhNetStateDead:
 		{
-			TzhNetPacketList *p1,*p2;
-
 			//关闭双向通信
 			zhSockShutdown(sion->s,ezhNetShutDownRDWR);
-			//清空发送链表所有内容
-			p1 = sion->sendDataList;
-			while(p1 != NULL)
-			{
-				p2 = p1->_next;
-				free (p1);
-				p1 = p2;
-			}
 
 			//关闭连接
 			zhSockClose(sion->s);
 			//
 			sion->tagPack.wNetPackPos=0;
 			sion->tagPack.bNetPackRecvBuf=false;
-			sion->sendDataList=NULL;
-			sion->pSendDataList_last=NULL;
-			DELETE_CS(&sion->csSendData);
+			if(sion->tagPack.btCache)
+			{
+				free(sion->tagPack.btCache);
+				sion->tagPack.btCache=NULL;
+			}
 			sion->cState=ezhNetStateZero;
 			return ezhNetEventDisconnect;
 		}
@@ -555,7 +450,7 @@ void _zhSionSendKeyEncrypt(TzhNetSession *sion)
 	sion->nEncryptKey[2]=nEncryptKey>>16&0xFF;
 	sion->nEncryptKey[3]=nEncryptKey>>24&0xFF;
 
-	if(zhSionInsertSendList(sion,(char*)sion->nEncryptKey,4))
+	if(zhSockSend(sion->s,(char*)sion->nEncryptKey,4))
 	{sion->cState=ezhNetStateConnected;}
 
 	ZH_NET_DEBUG_PRINTF("SetKey Sock=%d, nEncryptKey=%02x %02x %02x %02x",

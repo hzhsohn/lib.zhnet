@@ -41,6 +41,7 @@ extern "C"{
 #include "encrypt.h"
 #include "socket.h"
 #include "packet.h"
+#include "packet_heap.h"
 #include "gcdef.h"
 
 /*
@@ -51,7 +52,7 @@ extern "C"{
 typedef enum _EzhNetError
 {
 	//没有错误
-	ezhNetNoError				,
+	ezhNetNoError			=0	,
 	//收到数据包出错
 	ezhNetErrorPacketInvalid	,
 	//SOCKET出错
@@ -59,7 +60,9 @@ typedef enum _EzhNetError
 	//缓冲区溢出
 	ezhNetErrorCacheOverflow	,
 	//CRC校检出错
-	ezhNetErrorCRC16			
+	ezhNetErrorCRC16			,
+	//目标缓冲区不足
+	ezhNetErrorCacheNotEnough
 }EzhNetError;
 
 /*
@@ -79,19 +82,6 @@ typedef enum _EzhNetEvent
 	ezhNetEventDisconnect		,		
 }EzhNetEvent;
 
-/*
- *send data list struct
- *
- *发送链表的结构
-*/
-typedef struct _TzhNetPacketList
-{
-	char packet[sizeof(TzhPackFrame)];  //数据包
-	int packet_len;      //帧长度
-	int send_pos;		//发送的开始位置,与帧长度一样,代表已经处理完此记录
-
-	struct _TzhNetPacketList *_next;
-}TzhNetPacketList;
 
 /*
  *connect timeout value
@@ -105,7 +95,7 @@ typedef struct _TzhNetPacketList
  *
  *粘包处理缓冲区
 */
-#define ZH_NET_PACKET_SIZE			sizeof(TzhPackFrame)*2
+#define ZH_NET_PACKET_SIZE			ZH_NET_TCP_CACHE_LENGTH
 
 
 /*
@@ -143,8 +133,8 @@ typedef enum _EzhPackCacheType {
 typedef struct _TzhNetBPack
 {
 	bool					bNetPackRecvBuf;
-	unsigned short					wNetPackPos;
-	unsigned char					btCache[ZH_NET_PACKET_SIZE];
+	unsigned short			wNetPackPos;
+	unsigned char			*btCache;
 }TzhNetBPack;
 
 /*
@@ -210,16 +200,6 @@ typedef struct _TzhNetSession
 	 *资料结构指针
 	*/
 	void			*pInfo;
-
-	/*
-	 *send data list
-	 *
-	 *发送数据的排列的链表
-	*/
-	TYPE_CS csSendData;                   //发送列表的互斥锁
-	TzhNetPacketList *sendDataList;       //发送列表
-	TzhNetPacketList *pSendDataList_last; //发送列表的最后一个元素指针
-	int sendDataListCount;		  //发送列表的数量
 
 }TzhNetSession;
 
@@ -288,20 +268,8 @@ void zhSionSetBigSockCache(TzhNetSession *sion,int buf_size);
  *  true 插入到发送链表成功
  *  false 插入到发送链表失败,一般是内存不足引起
 */
-bool zhSionSend(TzhNetSession *sion,char*szPack,int nLen);
-bool zhSionSendPacket(TzhNetSession *sion,TzhPacket*pack);
-
-/*
- *将发送数据加到发送列表
- *
-*/
-bool zhSionInsertSendList(TzhNetSession *sion,char* yBuf,int nLen);
-
-/*
- *剩余发送缓冲记录数量
- *
-*/
-int zhSionGetSurplusSendCount(TzhNetSession *sion);
+int zhSionSend(TzhNetSession *sion,char*szPack,int nLen);
+int zhSionSendPacket(TzhNetSession *sion,TzhPacket*pack);
 
 /*
  *network system process,must be using in the program,cycle using
@@ -342,7 +310,7 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err);
  *		   { 处理frame数据... }
  *     }
 */
-int zhSionReadData(TzhNetSession *sion,unsigned char *frame,EzhNetError* err);
+int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNetError* err);
 
 /*
  *返回网络的事件

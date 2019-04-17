@@ -43,7 +43,7 @@ typedef struct _TzhPackFrameHeader
  *
  *包的类型,EzhPackType结构休
 */
-	unsigned char    yFrameFlag;	//固定 ZH_NET_FRAME_FLAG
+	unsigned char   yFrameFlag;	//固定 ZH_NET_FRAME_FLAG
 	unsigned char	wDataLenL1;   //后随的包体的长度
 	unsigned char	wDataLenL2;   //后随的包体的长度第二字节
 	unsigned char	wCRC16L1;     //包体的CRC校检,当包长度为0时CRC校检值为0
@@ -61,16 +61,9 @@ typedef struct _TzhPackFrameHeader
  *
  *每次发包的最大长度，不包括包头
 */
-#define ZH_NET_PACKET_BODY_LENGTH			2000			
+#define ZH_NET_PACKET_BODY_LENGTH			1024
+#define ZH_NET_TCP_CACHE_LENGTH				1024*15
 			
-//End---------->
-
-
-typedef struct _TzhPackFrame
-{
-	TzhPackFrameHeader header;
-	char	data[ZH_NET_PACKET_BODY_LENGTH];
-}TzhPackFrame;
 //End---------->
 
 #pragma pack()
