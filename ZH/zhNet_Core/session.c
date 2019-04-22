@@ -10,6 +10,7 @@ bool zhSionStartup(TzhNetListen* lisn,unsigned short wBindPort,bool isVariableFl
 	if(!zhSockListen(lisn->s))return false;
 
 	lisn->isStartupVariableFlowEncrypt=isVariableFlowEncrypt;
+
 	return true;
 }
 
@@ -24,6 +25,9 @@ bool zhSionInit(TzhNetSession *sion,unsigned short wBindPort)
 	sion->isStartupVariableFlowEncrypt=false;
 	memset(sion->nEncryptKey,0,4);
 	sion->isAlreadyGetEncryptSeed=false;
+
+	sion->tagPack.btCache=NULL;
+	sion->tagPack.wNetPackPos=0;
 
 	if(wBindPort>0)
 	{
