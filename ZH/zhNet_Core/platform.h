@@ -59,6 +59,7 @@ extern "C"{
 	#undef _countof
 	#define _countof(array) (sizeof(array)/sizeof(array[0]))
 	#define VSNPRINTF(a,b,c,d) _vsnprintf(a,b,c,d)
+	#define VSNPRINTF_S(a,b,c,d) _vsnprintf_s(a,b,b,c,d)
 
 	/* thread operate*/
 	#ifndef _zh_thread_type

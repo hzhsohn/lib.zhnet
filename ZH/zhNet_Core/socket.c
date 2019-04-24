@@ -286,7 +286,6 @@ bool zhSockClose(SOCKET s)
 	if (s == INVALID_SOCKET) return false;
 	
 	shutdown(s, 1);//SHUT_WR
-	recv(s, NULL, (size_t)0, 0);
 	CLOSESOCKET(s);
 	zhSockReset(&s);
 	if (--g_nCount==0)
