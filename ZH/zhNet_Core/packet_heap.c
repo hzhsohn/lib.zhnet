@@ -162,6 +162,19 @@ int zhPackHeapReadString(TzhPacketHeap *p, char* str)
 	return (int)len;
 }
 
+int	zhPackHeapReadStringN(TzhPacketHeap *p, char* str ,int strMaxLen)
+{
+	size_t len=0;
+	str[strMaxLen-1]=0;
+	strncpy(str, (char*)&p->btBuf[p->wPos],strMaxLen-2);
+	len = strlen(str);
+	str[len] = 0;
+	len += 1;
+
+	p->wPos+=(unsigned short)len;
+	return (int)len;
+}
+
 int zhPackHeapReadStringUnicode(TzhPacketHeap *p, char* str)
 {
 	size_t len=0;

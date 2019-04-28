@@ -61,6 +61,7 @@ int		zhPackReadLong(TzhPacket *p, long* i);
 int		zhPackWriteString(TzhPacket *p, char* str);
 int		zhPackWriteStringUnicode(TzhPacket *p, char* str);
 int		zhPackReadString(TzhPacket *p, char* str);
+int		zhPackReadStringN(TzhPacket *p, char* str ,int strMaxLen);
 int		zhPackReadStringUnicode(TzhPacket *p, char* str);
 int		zhPackWriteBinary(TzhPacket *p, char* str ,int len);
 int		zhPackReadBinary(TzhPacket *p, char* str ,int len);
