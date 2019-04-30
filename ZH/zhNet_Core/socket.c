@@ -236,9 +236,9 @@ int zhSockRecv(SOCKET s,char *buf, int buf_len)
 
 bool zhSockCanRead(SOCKET s,int tv_sec,int tv_usec)
 {
-	int ret;
-	fd_set readfds;
-	struct timeval timeout;
+	int ret=0;
+	fd_set readfds={0};
+	struct timeval timeout={0};
 
 	timeout.tv_sec=tv_sec;
 	timeout.tv_usec=tv_usec;
@@ -253,10 +253,10 @@ bool zhSockCanRead(SOCKET s,int tv_sec,int tv_usec)
 
 bool zhSockCanWrite(SOCKET s,int tv_sec,int tv_usec)
 {
-	int ret;
+	int ret=0;
 
-	fd_set writefds;
-	struct timeval timeout;
+	fd_set writefds={0};
+	struct timeval timeout={0};
 
 	timeout.tv_sec=tv_sec;
 	timeout.tv_usec=tv_usec;
@@ -295,7 +295,7 @@ bool zhSockClose(SOCKET s)
 
 SOCKET zhSockAccept(SOCKET s)
 {
-	struct sockaddr_in addr;
+	struct sockaddr_in addr={0};
 	int len = sizeof(addr);
 	SOCKET tmp;
 	tmp = accept(s,(SOCKADDR *)&addr,(socklen_t *)&len);
@@ -310,8 +310,8 @@ SOCKET zhSockAccept(SOCKET s)
 
 int zhSockSendTo(SOCKET s,char *buf, int len, struct sockaddr_in *addr)
 {
-	int ret;
-	int err;
+	int ret=0;
+	int err=0;
 	if (!zhSockCanWrite(s,0,0)) return 0;
 
 	ret = sendto(s,buf,len,0,(SOCKADDR *)addr,sizeof(struct sockaddr_in));
@@ -345,9 +345,9 @@ int zhSockRecvFrom(SOCKET s,char *buf, int buf_len, struct sockaddr_in *addr ,in
 
 bool zhSockHasExcept(SOCKET s,int tv_sec,int tv_usec)
 {
-	int ret;
-	fd_set exceptfds;
-	struct timeval timeout;
+	int ret=0;
+	fd_set exceptfds={0};
+	struct timeval timeout={0};
 
 	timeout.tv_sec=tv_sec;
 	timeout.tv_usec=tv_usec;
@@ -403,7 +403,7 @@ bool zhSockSetRecvBufferSize(SOCKET s,int len)
 bool zhSockGetLocalAddr(SOCKET s,char *addr,unsigned  short *port, unsigned long *ip)
 {
 	char *tmp;
-	struct sockaddr_in addrLocal;
+	struct sockaddr_in addrLocal={0};
 	socklen_t len = sizeof(addrLocal);
 	if(getsockname(s,(SOCKADDR*)&addrLocal,&len)==SOCKET_ERROR)
 		return false;
@@ -425,7 +425,7 @@ bool zhSockGetLocalAddr(SOCKET s,char *addr,unsigned  short *port, unsigned long
  */
 bool zhSockGetRemoteAddr(SOCKET s,char *addr,unsigned short *port,unsigned long *ip)
 {
-	struct sockaddr_in addrRemote;
+	struct sockaddr_in addrRemote={0};
 	char *tmp;
 	int len = sizeof(addrRemote);
 	if(getpeername(s,(struct sockaddr *)&addrRemote,(socklen_t *)&len)==SOCKET_ERROR)
