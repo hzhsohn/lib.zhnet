@@ -83,6 +83,11 @@ void ProcThread(TagThreadNode *pThreadNode)
 	time_t dwTmp;
 	int nDataProc;
 	TagUserListNode *pUser;
+	
+	unsigned char frame[ZH_NET_PACKET_BODY_LENGTH];
+	EzhNetError err;
+	int ret;
+
 	if(pThreadNode)
 	{
 		TCP_PRINT_LOG("Create New Proc Thread... Current Count=%d",zhNetListCount(&g_threadList));
@@ -106,16 +111,13 @@ void ProcThread(TagThreadNode *pThreadNode)
 				else
 				{
 					//网络数据处理-------begin
-					unsigned char frame[ZH_NET_PACKET_BODY_LENGTH];
-					EzhNetError err;
-					int ret;
 					if(false==zhSionCacheData(&pUser->user_node->sion,&err))
 					{
 						g_pfError(&pUser->user_node->sion,&pUser->user_node->sion.pInfo,err);
 					}
 					while(1)
 					{
-						ret=zhSionReadData(&pUser->user_node->sion,frame,&err);
+						ret=zhSionReadData(&pUser->user_node->sion,frame,sizeof(frame),&err);
 						if(0==ret)
 						{ break; }
 						else if(ret>0)
@@ -127,7 +129,7 @@ void ProcThread(TagThreadNode *pThreadNode)
 								frame,
 								ret);
 						}
-						else
+						if(err!=ezhNetNoError)
 						{
 							g_pfError(&pUser->user_node->sion,
 								pUser->user_node->sion.pInfo,

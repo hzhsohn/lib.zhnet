@@ -27,50 +27,45 @@ int main(int argc,char *argv[])
 				//
 				if(zhSionAccept(&g_listern,&tmpUser))
 				{
+					PRINTF("新TCP连接..!!");
 					clientUser=tmpUser;
 				}
 
-				//网络数据处理-------begin
-				if(false==zhSionCacheData(&clientUser,&err))
+				if(clientUser.s)
 				{
-					zhError(&clientUser,&clientUser.pInfo,err);
+							//网络数据处理-------begin
+							if(false==zhSionCacheData(&clientUser,&err))
+							{
+								zhError(&clientUser,&clientUser.pInfo,err);
+							}
+							while(1)
+							{
+								ret=zhSionReadData(&clientUser,frame,sizeof(frame),&err);
+								if(0==ret)
+								{ break; }
+								else if(ret>0)
+								{
+									//处理frame数据
+									zhRecv(&clientUser,
+										clientUser.pInfo,
+										frame,
+										ret);
+								}
+								if(err!=ezhNetNoError)
+								{
+									zhError(&clientUser, clientUser.pInfo, err);
+								}
+							}
+							switch(zhSionStateThread(&clientUser))
+							{
+								//断开连接
+								case ezhNetEventDisconnect:
+									zhDisconnect(&clientUser,
+										clientUser.pInfo);
+									break;
+							}
+							//------------------end
 				}
-				while(1)
-				{
-					ret=zhSionReadData(&clientUser,frame,&err);
-					if(0==ret)
-					{ break; }
-					else if(ret>0)
-					{
-						//处理frame数据
-						zhRecv(&clientUser,
-							clientUser.pInfo,
-							frame,
-							ret);
-					}
-					else
-					{
-						zhError(&clientUser, clientUser.pInfo, err);
-					}
-				}
-				switch(zhSionStateThread(&clientUser))
-				{
-						//连接成功
-					case ezhNetEventConnected:
-						break;
-						//连接失败
-					case ezhNetEventConnectTimeout:
-						break;
-						//断开连接
-					case ezhNetEventDisconnect:
-						zhDisconnect(&clientUser,
-							clientUser.pInfo);
-						break;
-						//没有事件
-					case ezhNetNoEvent:
-						break;
-				}
-				//------------------end
 		}
 	}
 	return 0;
@@ -100,17 +95,5 @@ void zhDisconnect(TzhNetSession*sion,void* info)
 
 void zhError(TzhNetSession* sion,void* info,EzhNetError err)
 {
-	switch (err)
-	{
-		//收到数据包出错
-		case ezhNetErrorPacketInvalid:
-		break;
-		//缓冲区溢出
-		case ezhNetErrorCacheOverflow:
-		break;
-		//CRC校检出错
-		case ezhNetErrorCRC16:
-		break;
-	}
-
+	PRINTF("zhError..!!  Socket=%d  Error=%d",sion->s,err);
 }

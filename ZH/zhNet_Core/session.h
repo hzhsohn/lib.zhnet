@@ -62,7 +62,9 @@ typedef enum _EzhNetError
 	//CRC校检出错
 	ezhNetErrorCRC16			,
 	//目标缓冲区不足
-	ezhNetErrorCacheNotEnough
+	ezhNetErrorCacheNotEnough	,
+	//数据接收超时
+	ezhNetErrorRecvOvertime
 }EzhNetError;
 
 /*
@@ -96,6 +98,13 @@ typedef enum _EzhNetEvent
  *粘包处理缓冲区
 */
 #define ZH_NET_PACKET_SIZE			ZH_NET_TCP_CACHE_LENGTH
+
+/*
+ *data recv overtime
+ *
+ *数据包接收超时,单位ms
+*/
+#define ZH_NET_RECV_OVERTIME		3000
 
 
 /*
@@ -135,6 +144,7 @@ typedef struct _TzhNetBPack
 	bool					bNetPackRecvBuf;
 	unsigned short			wNetPackPos;
 	unsigned char			*btCache;
+	unsigned long			lastRecvBufTime; //最后一次接收数据的时间
 }TzhNetBPack;
 
 /*

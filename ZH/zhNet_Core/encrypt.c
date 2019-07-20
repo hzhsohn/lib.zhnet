@@ -27,11 +27,13 @@ rights reserved.
 //
 int zhNetGetRandEncryptKey()
 {
-	time_t dw;
-	int ret;
+	time_t dw=0;
+	int ret=0;
 	dw=zhPlatGetTime();
 	srand((int)dw);
 	ret=rand();
+	ret|=rand()<<24;
+	ret|=rand()<<16;
 	while(ret == 0)
 	{
 		dw=zhPlatGetTime();

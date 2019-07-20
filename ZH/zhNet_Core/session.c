@@ -115,15 +115,6 @@ int zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
 		return -1;
 	}
 
-	/*
-	if(sion->cState!=ezhNetStateConnected)
-	{
-		ZH_NET_DEBUG_PRINTF("zhSionSend Error->disconnecting...");
-		if(sion->pfError)
-		{sion->pfError(sion,sion->pInfo,ezhNetErrorSend);}
-		return 0;
-	}*/
-	
 	nSendLen=sizeof(TzhPackFrameHeader)+nLen;
 	sendBuf=(unsigned char*)malloc(nSendLen);
 
@@ -172,7 +163,9 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
 	if(nBufSize!=SOCKET_ERROR)
 	{
 		if(nBufSize>0)
-		{		
+		{
+			//最后一次接收数据包的时间
+			sion->tagPack.lastRecvBufTime=zhPlatGetTime();
 			//如果缓存区积压太大的话直接断开SOCKET
 			if(sion->tagPack.wNetPackPos+nBufSize>=ZH_NET_PACKET_SIZE)
 			{
@@ -219,7 +212,7 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
 				else
 				{
 					//zhPlatPrint16(4,&sion->nEncryptKey);
-					//解密
+					//还原加密数据
 					zhNetDecrypt(sion->isStartupVariableFlowEncrypt,szTmpBuf,nBufSize,sion->nEncryptKey);			
 					//
 					memcpy(&sion->tagPack.btCache[sion->tagPack.wNetPackPos],szTmpBuf,nBufSize);
@@ -242,6 +235,7 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNet
 {
 		int nRet;
 		int nTmpPos1,nTmpPos2;
+		unsigned long ltmpTime;
 		
 		nRet=0;
 		if(sion->tagPack.wNetPackPos>=sizeof(TzhPackFrameHeader))
@@ -368,6 +362,21 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNet
 		}
 
 		*err=ezhNetNoError;
+		
+		//判断数据包接收超时判断
+		if(sion->tagPack.wNetPackPos>0)
+		{
+			ltmpTime=zhPlatGetTime();
+			if(ltmpTime - sion->tagPack.lastRecvBufTime > ZH_NET_RECV_OVERTIME)
+			{
+				sion->tagPack.lastRecvBufTime=ltmpTime;
+				//清空所有缓存数据
+				sion->tagPack.wNetPackPos=0;
+				sion->tagPack.btCache[0]=0x00;
+				//返回错误
+				*err=ezhNetErrorRecvOvertime;
+			}
+		}
 		return nRet;
 }
 
