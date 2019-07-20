@@ -298,6 +298,8 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNet
 							{
 								memcpy(frame,&sion->tagPack.btCache[sizeof(TzhPackFrameHeader)],wDataLen);
 								nRet=wDataLen;
+								//更新接收时间
+								sion->tagPack.lastRecvBufTime=zhPlatGetTime();
 							}
 							else
 							{

@@ -104,7 +104,7 @@ typedef enum _EzhNetEvent
  *
  *数据包接收超时,单位ms
 */
-#define ZH_NET_RECV_OVERTIME		3000
+#define ZH_NET_RECV_OVERTIME		5000
 
 
 /*

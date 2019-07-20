@@ -24,7 +24,7 @@ void NetKeepTime(TzhNetSession*sion)
 			TzhPacket pack;
 			zhPackWriteInit(&pack);
 			zhPackWriteInt(&pack, 2);
-			zhPackWriteString(&pack, "可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱可爱");
+			zhPackWriteString(&pack, "可爱可爱可爱");
 			//发送
 			zhSionSend(sion,(char*)pack.btBuf,pack.wSize);
 			//
