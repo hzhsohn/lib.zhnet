@@ -46,7 +46,7 @@ TagUserNode *UserDelete(TzhNetList *pUserList, TzhNetSession sion)
 
 	if(pUser == NULL)
 	{
-		printf("Session: no socket=%d %s\n", sion.s);
+		printf("Session: no socket=%d\n", sion.s);
 		goto end;
 	}
 	pNew=(TagUserNode *)zhNetListNext((TzhNetNode *)pUser);
