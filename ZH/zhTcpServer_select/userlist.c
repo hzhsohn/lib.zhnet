@@ -102,7 +102,7 @@ TagUserListNode *UserListDelete(TzhNetList *pUserNodeList, TagUserNode *user_nod
 
 	if(pUserNode == NULL)
 	{
-		printf("Session: no socket=%d %s\n", user_node->sion.s);
+		printf("Session: no socket=%d\n", user_node->sion.s);
 		goto end;
 	}
 	pNew=(TagUserListNode *)zhNetListNext((TzhNetNode *)pUserNode);
