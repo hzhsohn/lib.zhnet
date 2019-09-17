@@ -92,14 +92,18 @@ bool zhSionSafeClose(TzhNetSession *sion)
     if(ezhNetStateZero!=sion->cState)
 	{
         sion->cState=ezhNetStateDead;
-        return true;
     }
 	if(sion->tagPack.btCache)
 	{
 		free(sion->tagPack.btCache);
 		sion->tagPack.btCache=NULL;
 	}
-	return false;
+	if(sion->s)
+	{
+		zhSockClose(sion->s);
+		sion->s=0;
+	}
+	return true;
 }
 
 int zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
@@ -415,7 +419,10 @@ EzhNetEvent zhSionStateThread(TzhNetSession*sion)
 			zhSockShutdown(sion->s,ezhNetShutDownRDWR);
 
 			//¹Ø±ÕÁ¬½Ó
-			zhSockClose(sion->s);
+			if(sion->s)
+			{
+				zhSockClose(sion->s);
+			}
 			//
 			sion->tagPack.wNetPackPos=0;
 			sion->tagPack.bNetPackRecvBuf=false;
