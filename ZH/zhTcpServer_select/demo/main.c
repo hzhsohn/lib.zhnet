@@ -93,7 +93,7 @@ void zhError(TzhNetSession* sion,void* info,EzhNetError err)
 void zhRealTime(TzhNetSession *sion,void* info)
 {
 	//printf("zhRealTime\n");
-	NetKeepTimeout(sion);
+	//NetKeepTimeout(sion);
 }
 
 void zhRecvPack(TzhNetSession *sion,TagUserInfo*info,unsigned short wCmd,TzhPacket *pack)

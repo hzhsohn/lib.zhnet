@@ -242,6 +242,22 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNet
 		unsigned long ltmpTime;
 		
 		nRet=0;
+
+		//判断数据包接收超时判断
+		if(sion->tagPack.wNetPackPos>0)
+		{
+			ltmpTime=zhPlatGetTime();
+			if(ltmpTime - sion->tagPack.lastRecvBufTime > ZH_NET_RECV_OVERTIME)
+			{
+				sion->tagPack.lastRecvBufTime=ltmpTime;
+				//清空所有缓存数据
+				sion->tagPack.wNetPackPos=0;
+				sion->tagPack.btCache[0]=0x00;
+				//返回错误
+				*err=ezhNetErrorRecvOvertime;
+			}
+		}
+
 		if(sion->tagPack.wNetPackPos>=sizeof(TzhPackFrameHeader))
 		{
 			TzhPackFrameHeader packetHeader;
@@ -369,20 +385,6 @@ int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNet
 
 		*err=ezhNetNoError;
 		
-		//判断数据包接收超时判断
-		if(sion->tagPack.wNetPackPos>0)
-		{
-			ltmpTime=zhPlatGetTime();
-			if(ltmpTime - sion->tagPack.lastRecvBufTime > ZH_NET_RECV_OVERTIME)
-			{
-				sion->tagPack.lastRecvBufTime=ltmpTime;
-				//清空所有缓存数据
-				sion->tagPack.wNetPackPos=0;
-				sion->tagPack.btCache[0]=0x00;
-				//返回错误
-				*err=ezhNetErrorRecvOvertime;
-			}
-		}
 		return nRet;
 }
 
