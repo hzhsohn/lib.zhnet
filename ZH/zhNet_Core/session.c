@@ -103,9 +103,32 @@ bool zhSionSafeClose(TzhNetSession *sion)
 		zhSockClose(sion->s);
 		sion->s=0;
 	}
+	//
+	sion->tagPack.wNetPackPos=0;
+	sion->tagPack.bNetPackRecvBuf=false;
 	return true;
 }
-
+bool zhSionClose(TzhNetSession *sion)
+{
+    //关闭连接
+	if(sion->s)
+	{
+		//关闭双向通信
+		zhSockShutdown(sion->s,ezhNetShutDownRDWR);
+		zhSockClose(sion->s);
+		sion->s=0;
+	}
+	//
+	sion->tagPack.wNetPackPos=0;
+	sion->tagPack.bNetPackRecvBuf=false;
+	if(sion->tagPack.btCache)
+	{
+		free(sion->tagPack.btCache);
+		sion->tagPack.btCache=NULL;
+	}
+	sion->cState=ezhNetStateZero;
+	return true;
+}
 int zhSionSend(TzhNetSession *sion,char* szPack,int nLen)
 {
 	int nSendLen=0;
@@ -417,13 +440,13 @@ EzhNetEvent zhSionStateThread(TzhNetSession*sion)
 		break;
 	case ezhNetStateDead:
 		{
-			//关闭双向通信
-			zhSockShutdown(sion->s,ezhNetShutDownRDWR);
-
 			//关闭连接
 			if(sion->s)
 			{
+				//关闭双向通信
+				zhSockShutdown(sion->s,ezhNetShutDownRDWR);
 				zhSockClose(sion->s);
+				sion->s=0;
 			}
 			//
 			sion->tagPack.wNetPackPos=0;

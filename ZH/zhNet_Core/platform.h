@@ -1,4 +1,4 @@
-/*
+﻿/*
   platform.h - The difference between the platform and the 
 				corresponding processing platform system function
   2009/7/20
@@ -59,7 +59,8 @@ extern "C"{
 	#undef _countof
 	#define _countof(array) (sizeof(array)/sizeof(array[0]))
 	#define VSNPRINTF(a,b,c,d) _vsnprintf(a,b,c,d)
-	#define VSNPRINTF_S(a,b,c,d) _vsnprintf_s(a,b,b,c,d)
+	#define VSNPRINTF_S(a,b,c,d) _vsnprintf_s(a,b,b,c,d)	
+	#define snprintf    sprintf_s
 
 	/* thread operate*/
 	#ifndef _zh_thread_type
@@ -110,6 +111,13 @@ extern "C"{
 	#define	ZH_INLINE					inline
 #endif
 
+/*
+ 初始化基础变量
+*/
+void zhPlatInit();
+void zhPlatDestory();
+void zhPlatLock();
+void zhPlatUnlock();
 
 /*
  *data check sum function,the function apply to 
@@ -160,7 +168,7 @@ void zhPlatFreeConsole();
 */
 void zhPlatPrintf(char*format,...);
 void zhPlatPrint16(int len,char*buf);
-char* zhPlatPrintf16ToBuf(int len,char *buf,char*dstString);
+char* zhPlatPrintf16ToBuf(int len,char *buf,char*dstString,int dstStringLen);
 
 
 //

@@ -227,9 +227,12 @@ void zhInitTcpProc(unsigned short		wBindPort,
 					//如果是小型嵌入式设备3K就足够了,根据情况使用
 					zhSionSetBigSockCache(&tmpUser,ezhPackCache64K);
 					unode=ConnectAdd(tmpUser);
-					TCP_PRINT_LOG("Session Connect, Socket=%d , dwStartTime=%d,user_count=%d",tmpUser.s,tmpUser.dwStartTime,zhNetListCount(&g_userList));
-					g_dwOldTime=zhPlatGetTime();
-					g_pfAccept(&unode->sion,unode->sion.pInfo);
+					if(unode)
+					{
+						TCP_PRINT_LOG("Session Connect, Socket=%d , dwStartTime=%d,user_count=%d",tmpUser.s,tmpUser.dwStartTime,zhNetListCount(&g_userList));
+						g_dwOldTime=zhPlatGetTime();
+						g_pfAccept(&unode->sion,unode->sion.pInfo);
+					}
 				}
 				else
 				{

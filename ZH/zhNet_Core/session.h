@@ -1,4 +1,4 @@
-/* 
+ï»¿/* 
   Copyright (C) 2008-2, Han.zhihong, Developer. Created 2008. 
   All rights reserved.
 
@@ -19,14 +19,14 @@
   ==================================================================
   session.h:the connect session manage
 
-  Ö¡½á¹¹:
-	unsigned char   yFrameFlag;	//¹Ì¶¨ ZH_NET_FRAME_FLAG
-	unsigned short	wDataLen;   //ºóËæµÄ°üÌåµÄ³¤¶È
-	unsigned short	wCRC16;     //°üÌåµÄCRCĞ£¼ì,µ±°ü³¤¶ÈÎª0Ê±CRCĞ£¼ìÖµÎª0
-	unsigned char	...;		//¸ù¾İwDataLen¶ø¶¨µÄ°üÌå
+  å¸§ç»“æ„:
+	unsigned char   yFrameFlag;	//å›ºå®š ZH_NET_FRAME_FLAG
+	unsigned short	wDataLen;   //åéšçš„åŒ…ä½“çš„é•¿åº¦
+	unsigned short	wCRC16;     //åŒ…ä½“çš„CRCæ ¡æ£€,å½“åŒ…é•¿åº¦ä¸º0æ—¶CRCæ ¡æ£€å€¼ä¸º0
+	unsigned char	...;		//æ ¹æ®wDataLenè€Œå®šçš„åŒ…ä½“
 
 
-  ¾ßÌå½á¹¹Ìå¶¨ÒåÔÚgcdef.hÍ·ÎÄ¼şÀïÃæ
+  å…·ä½“ç»“æ„ä½“å®šä¹‰åœ¨gcdef.hå¤´æ–‡ä»¶é‡Œé¢
 */
 
 #pragma once
@@ -47,40 +47,40 @@ extern "C"{
 /*
  *error message
  *
- *´íÎóĞÅÏ¢
+ *é”™è¯¯ä¿¡æ¯
 */
 typedef enum _EzhNetError
 {
-	//Ã»ÓĞ´íÎó
+	//æ²¡æœ‰é”™è¯¯
 	ezhNetNoError			=0	,
-	//ÊÕµ½Êı¾İ°ü³ö´í
+	//æ”¶åˆ°æ•°æ®åŒ…å‡ºé”™
 	ezhNetErrorPacketInvalid	,
-	//SOCKET³ö´í
+	//SOCKETå‡ºé”™
 	ezhNetErrorSocket			,
-	//»º³åÇøÒç³ö
+	//ç¼“å†²åŒºæº¢å‡º
 	ezhNetErrorCacheOverflow	,
-	//CRCĞ£¼ì³ö´í
+	//CRCæ ¡æ£€å‡ºé”™
 	ezhNetErrorCRC16			,
-	//Ä¿±ê»º³åÇø²»×ã
+	//ç›®æ ‡ç¼“å†²åŒºä¸è¶³
 	ezhNetErrorCacheNotEnough	,
-	//Êı¾İ½ÓÊÕ³¬Ê±
+	//æ•°æ®æ¥æ”¶è¶…æ—¶
 	ezhNetErrorRecvOvertime
 }EzhNetError;
 
 /*
  *session's net event
  *
- *SESSION»á»°µÄÍøÂçµÄÊÂ¼ş
+ *SESSIONä¼šè¯çš„ç½‘ç»œçš„äº‹ä»¶
 */
 typedef enum _EzhNetEvent
 {
-	//Ã»ÓĞÊÂ¼ş
+	//æ²¡æœ‰äº‹ä»¶
 	ezhNetNoEvent				,
-	//Á¬½Ó³É¹¦
+	//è¿æ¥æˆåŠŸ
 	ezhNetEventConnected		,
-	//Á¬½ÓÊ§°Ü
+	//è¿æ¥å¤±è´¥
 	ezhNetEventConnectTimeout	,
-	//¶Ï¿ªÁ¬½Ó
+	//æ–­å¼€è¿æ¥
 	ezhNetEventDisconnect		,		
 }EzhNetEvent;
 
@@ -88,21 +88,21 @@ typedef enum _EzhNetEvent
 /*
  *connect timeout value
  *
- *Á¬½Ó³¬Ê±Ê±¼ä
+ *è¿æ¥è¶…æ—¶æ—¶é—´
 */
 #define ZH_NET_CONNECT_TIMEOUT		15*1000
 
 /*
  *the stick package management buffer
  *
- *Õ³°ü´¦Àí»º³åÇø
+ *ç²˜åŒ…å¤„ç†ç¼“å†²åŒº
 */
 #define ZH_NET_PACKET_SIZE			ZH_NET_TCP_CACHE_LENGTH
 
 /*
  *data recv overtime
  *
- *Êı¾İ°ü½ÓÊÕ³¬Ê±,µ¥Î»ms
+ *æ•°æ®åŒ…æ¥æ”¶è¶…æ—¶,å•ä½ms
 */
 #define ZH_NET_RECV_OVERTIME		5000
 
@@ -110,7 +110,7 @@ typedef enum _EzhNetEvent
 /*
  *enum session status
  *
- *Ã¶¾Ù»á»°×´Ì¬
+ *æšä¸¾ä¼šè¯çŠ¶æ€
 */
 typedef enum _EzhNetState {
 	ezhNetStateZero			=0,
@@ -124,7 +124,7 @@ typedef enum _EzhNetState {
 /*
  *enum packet/cache/buffer size
  *
- *Ã¶¾Ù»º³åÇø´óĞ¡
+ *æšä¸¾ç¼“å†²åŒºå¤§å°
 */
 typedef enum _EzhPackCacheType {
 	ezhPackCacheDefault=1024*8,
@@ -137,20 +137,20 @@ typedef enum _EzhPackCacheType {
 /*
  *session packet logic manage 
  *
- *»á»°²ãÊı¾İ°ü¹ÜÀí
+ *ä¼šè¯å±‚æ•°æ®åŒ…ç®¡ç†
 */
 typedef struct _TzhNetBPack
 {
 	bool					bNetPackRecvBuf;
 	unsigned short			wNetPackPos;
 	unsigned char			*btCache;
-	unsigned long			lastRecvBufTime; //×îºóÒ»´Î½ÓÊÕÊı¾İµÄÊ±¼ä
+	unsigned long			lastRecvBufTime; //æœ€åä¸€æ¬¡æ¥æ”¶æ•°æ®çš„æ—¶é—´
 }TzhNetBPack;
 
 /*
  *listern subject
  *
- *¼àÌıµÄ½á¹¹
+ *ç›‘å¬çš„ç»“æ„
 */
 typedef struct _TzhNetListen
 {
@@ -158,7 +158,7 @@ typedef struct _TzhNetListen
 	/*
 	 *encrypt key and type,using for the transmission logic
 	 *
-	 *¼ÓÃÜÔ¿³×ºÍ¼ÓÃÜÀàĞÍ
+	 *åŠ å¯†é’¥åŒ™å’ŒåŠ å¯†ç±»å‹
 	*/
 	bool		isStartupVariableFlowEncrypt;
 }TzhNetListen;
@@ -166,7 +166,7 @@ typedef struct _TzhNetListen
 /*
  *session subject
  *
- *µ¥¸ö»á»°½á¹¹
+ *å•ä¸ªä¼šè¯ç»“æ„
 */
 typedef struct _TzhNetSession
 {
@@ -178,7 +178,7 @@ typedef struct _TzhNetSession
 	/*
 	 *encrypt key and type,using for the transmission logic
 	 *
-	 *¼ÓÃÜÔ¿³×ºÍ¼ÓÃÜÀàĞÍ
+	 *åŠ å¯†é’¥åŒ™å’ŒåŠ å¯†ç±»å‹
 	*/
 	unsigned char		nEncryptKey[4];
 	bool		isStartupVariableFlowEncrypt;
@@ -186,28 +186,28 @@ typedef struct _TzhNetSession
 	/*
 	 *check encrypt
 	 *
-	 *±ê¼Ç¿Í»§ÊÇ·ñÒÑ¾­»ñÈ¡¼ÓÃÜÖÖ×Ó
+	 *æ ‡è®°å®¢æˆ·æ˜¯å¦å·²ç»è·å–åŠ å¯†ç§å­
 	*/
 	bool isAlreadyGetEncryptSeed;
 
 	/*
 	 *begin connect time
 	 *
-	 *¿ªÊ¼Á¬½ÓµÄÊ±¼ä
+	 *å¼€å§‹è¿æ¥çš„æ—¶é—´
 	*/
 	unsigned long		dwStartTime;
 
 	/*
 	 *stick packet processing
 	 *
-	 *½â¾öÕ³°ü
+	 *è§£å†³ç²˜åŒ…
 	*/
 	TzhNetBPack			tagPack;
 
 	/*
 	 *infomation point
 	 *
-	 *×ÊÁÏ½á¹¹Ö¸Õë
+	 *èµ„æ–™ç»“æ„æŒ‡é’ˆ
 	*/
 	void			*pInfo;
 
@@ -216,23 +216,23 @@ typedef struct _TzhNetSession
 /*
  *server port for initizal bind and listen function
  *
- *·şÎñÆ÷¼àÌıÓÃµÄ³õÊ¼»¯º¯Êı
- *GCHEM_Encrypt_Type type Á¬½ÓÊ¹ÓÃµÄ¼ÓÃÜÄ£Ê½
- *encrypt_default_key ³õÊ¼»¯¼ÓÃÜµÄÃÜÂë
+ *æœåŠ¡å™¨ç›‘å¬ç”¨çš„åˆå§‹åŒ–å‡½æ•°
+ *GCHEM_Encrypt_Type type è¿æ¥ä½¿ç”¨çš„åŠ å¯†æ¨¡å¼
+ *encrypt_default_key åˆå§‹åŒ–åŠ å¯†çš„å¯†ç 
 */
 bool zhSionStartup(TzhNetListen* lisn,unsigned short wBindPort,bool isStartupVariableFlowEncrypt);
 
 /*
  *client port for initizal function
  *
- *¿Í»§¶ËÓÃµÄ³õÊ¼»¯º¯Êı
+ *å®¢æˆ·ç«¯ç”¨çš„åˆå§‹åŒ–å‡½æ•°
 */
 bool zhSionInit(TzhNetSession *sion,unsigned short wBindPort);
 
 /*
  *set session info data
  *
- *Éè±¸session¶ÔÓ¦µÄÊı¾İ½á¹¹Ìå
+ *è®¾å¤‡sessionå¯¹åº”çš„æ•°æ®ç»“æ„ä½“
 */
 void zhSionSetInfo(TzhNetSession *sion,void* pInfo);
 
@@ -240,43 +240,44 @@ void zhSionSetInfo(TzhNetSession *sion,void* pInfo);
 /*
  *client connect function,using by not blacking
  *
- *¿Í»§¶ËÁ¬½Óº¯Êı,ÊÇ·Ç×èÈûÊ¹ÓÃ
+ *å®¢æˆ·ç«¯è¿æ¥å‡½æ•°,æ˜¯éé˜»å¡ä½¿ç”¨
  *
- *·µ»ØÖµ
- *   true ÎªÁ¬½Ó³õÊ¼»¯³É¹¦
- *   false ³õÊ¼Á¬½ÓÊ§°Ü
+ *è¿”å›å€¼
+ *   true ä¸ºè¿æ¥åˆå§‹åŒ–æˆåŠŸ
+ *   false åˆå§‹è¿æ¥å¤±è´¥
 */
 bool zhSionConnect(TzhNetSession *sion,char*szIp,unsigned short wRemotoPort);
 
 /*
  *server accept session event,cycle using 
  *
- *ÓĞĞÂÁ¬½Ó½ÓÈë,Ñ­»·Ê¹ÓÃ
+ *æœ‰æ–°è¿æ¥æ¥å…¥,å¾ªç¯ä½¿ç”¨
 */
 bool zhSionAccept(TzhNetListen* lisn,TzhNetSession *sion);
 
 /*
  *close session link
  *
- *¹Ø±ÕÁ¬½Ó
+ *å…³é—­è¿æ¥
 */
 bool zhSionSafeClose(TzhNetSession *sion);
+bool zhSionClose(TzhNetSession *sion);
 
 /*
  *setting socket transmission buffer size
  *
- *ÉèÖÃSOCKETµÄ´«Êä»º³åÇø´óĞ¡
+ *è®¾ç½®SOCKETçš„ä¼ è¾“ç¼“å†²åŒºå¤§å°
 */
 void zhSionSetBigSockCache(TzhNetSession *sion,int buf_size);
 
 /*
  *send data function
  *
- *·¢ËÍº¯Êı,½«Êı¾İ°üÌí¼ÓÖÁ·¢ËÍÁ´±í
+ *å‘é€å‡½æ•°,å°†æ•°æ®åŒ…æ·»åŠ è‡³å‘é€é“¾è¡¨
  *
- *·µ»ØÖµ
- *  true ²åÈëµ½·¢ËÍÁ´±í³É¹¦
- *  false ²åÈëµ½·¢ËÍÁ´±íÊ§°Ü,Ò»°ãÊÇÄÚ´æ²»×ãÒıÆğ
+ *è¿”å›å€¼
+ *  true æ’å…¥åˆ°å‘é€é“¾è¡¨æˆåŠŸ
+ *  false æ’å…¥åˆ°å‘é€é“¾è¡¨å¤±è´¥,ä¸€èˆ¬æ˜¯å†…å­˜ä¸è¶³å¼•èµ·
 */
 int zhSionSend(TzhNetSession *sion,char*szPack,int nLen);
 int zhSionSendPacket(TzhNetSession *sion,TzhPacket*pack);
@@ -284,27 +285,27 @@ int zhSionSendPacket(TzhNetSession *sion,TzhPacket*pack);
 /*
  *network system process,must be using in the program,cycle using
  *
- *½ÓÊÕÊı¾İµ½»º³åÇøµÄÊÕ¼¯Æ÷,Ñ­»·µ÷ÓÃ
+ *æ¥æ”¶æ•°æ®åˆ°ç¼“å†²åŒºçš„æ”¶é›†å™¨,å¾ªç¯è°ƒç”¨
  *
- *·µ»ØÖµ
- *   false ´¦ÀíÊ§°Ü
- *    true ÕıÈ· 
+ *è¿”å›å€¼
+ *   false å¤„ç†å¤±è´¥
+ *    true æ­£ç¡® 
 */
 bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err);
 
 /*
  *
- *´¦ÀíÊı¾İ»º³åÇøµÄ¹¦ÄÜ,Èç¹û²»µ÷ÓÃzhSionCacheData,Õâº¯ÊıÓÀÔ¶²»»áÓĞÊı¾İ·µ»Ø
- *Êı¾İÔÚ·µ»Øµ½ÉÏzhSionReadDataÍ¬Ò»²ãÊ±,ÒÑ¾­¾­¹ı¹ıÂË,Ğ£Ñé,ÅÅ³ı²»ºÏ¸ñµÄÊı¾İ
+ *å¤„ç†æ•°æ®ç¼“å†²åŒºçš„åŠŸèƒ½,å¦‚æœä¸è°ƒç”¨zhSionCacheData,è¿™å‡½æ•°æ°¸è¿œä¸ä¼šæœ‰æ•°æ®è¿”å›
+ *æ•°æ®åœ¨è¿”å›åˆ°ä¸ŠzhSionReadDataåŒä¸€å±‚æ—¶,å·²ç»ç»è¿‡è¿‡æ»¤,æ ¡éªŒ,æ’é™¤ä¸åˆæ ¼çš„æ•°æ®
  *
- *·µ»ØÖµ
- *    -1= ÓĞ´íÎó,
- *     0= »º³åÇøÊı¾İ²»ÂúÒ»Ö¡
- *     0> ·µ»ØÖ¡´óĞ¡
- *     frame Êı¾İÖ¡ÄÚÈİ
- *     err ´íÎóµÄÏûÏ¢
+ *è¿”å›å€¼
+ *    -1= æœ‰é”™è¯¯,
+ *     0= ç¼“å†²åŒºæ•°æ®ä¸æ»¡ä¸€å¸§
+ *     0> è¿”å›å¸§å¤§å°
+ *     frame æ•°æ®å¸§å†…å®¹
+ *     err é”™è¯¯çš„æ¶ˆæ¯
  *
- *Àı×Ó:
+ *ä¾‹å­:
  *     int ret;
  *     while(1)
  *     {
@@ -317,15 +318,15 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err);
  *             {...}
  *         }
  *		   else
- *		   { ´¦ÀíframeÊı¾İ... }
+ *		   { å¤„ç†frameæ•°æ®... }
  *     }
 */
 int zhSionReadData(TzhNetSession *sion,unsigned char *frame,int frame_len,EzhNetError* err);
 
 /*
- *·µ»ØÍøÂçµÄÊÂ¼ş
+ *è¿”å›ç½‘ç»œçš„äº‹ä»¶
  * 
- *Àı×Ó
+ *ä¾‹å­
  *    switch(zhSionStateThread(...))
  *    {...}
 */
@@ -334,14 +335,14 @@ EzhNetEvent zhSionStateThread(TzhNetSession *sion);
 /*
  *get local ip and port for session
  *
- *´Ó»á»°ÖĞ»ñÈ¡±¾µØIPºÍ¶Ë¿ÚĞÅÏ¢
+ *ä»ä¼šè¯ä¸­è·å–æœ¬åœ°IPå’Œç«¯å£ä¿¡æ¯
 */
 bool zhSionLocalAddr (TzhNetSession *sion,char *addr,unsigned short *port,unsigned int *ip);
 
 /*
  *get remote socket ip and port for session
  *
- *´Ó»á»°ÖĞ»ñÈ¡¶Ô·½IPºÍ¶Ë¿ÚĞÅÏ¢
+ *ä»ä¼šè¯ä¸­è·å–å¯¹æ–¹IPå’Œç«¯å£ä¿¡æ¯
 */
 bool zhSionRemoteAddr(TzhNetSession *sion,char *addr,unsigned short *port,unsigned int *ip);
 
@@ -349,7 +350,7 @@ bool zhSionRemoteAddr(TzhNetSession *sion,char *addr,unsigned short *port,unsign
 /*
  *logical function of the session layer, using private 
  *
- *»á»°²ãÂß¼­º¯Êı,¶ÔË½Ê¹ÓÃ
+ *ä¼šè¯å±‚é€»è¾‘å‡½æ•°,å¯¹ç§ä½¿ç”¨
 */
 void _zhSionSendKeyEncrypt(TzhNetSession *sion);
 

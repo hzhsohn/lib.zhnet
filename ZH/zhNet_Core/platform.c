@@ -1,4 +1,4 @@
-/*
+﻿/*
   platform.h - The difference between the platform and the 
 				corresponding processing platform system function
   2009/7/20
@@ -29,6 +29,7 @@
 pthread_t _pthreadid;
 #endif
 
+TYPE_CS g_platformCS;
 /////////////////////////////////////////////////////////////////////////
 //crc16
 
@@ -81,6 +82,23 @@ const unsigned char aucCRCLo[] = {
      0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83,
      0x41, 0x81, 0x80, 0x40
 };
+
+void zhPlatInit()
+{
+	INIT_CS(&g_platformCS);
+}
+void zhPlatDestory()
+{
+	DELETE_CS(&g_platformCS);
+}
+void zhPlatLock()
+{
+	LOCK_CS(&g_platformCS);
+}
+void zhPlatUnlock()
+{
+	UNLOCK_CS(&g_platformCS);
+}
 
 unsigned short zhPlatCRC16(unsigned char * frame, unsigned short len )
 {
@@ -156,11 +174,11 @@ void zhPlatFreeConsole()
 //输出信息 
 void zhPlatPrintf(char*format,...)
 {
-	char buf[256];
+	char buf[512];
 	va_list args;
 	va_start(args, format);
 
-	VSNPRINTF(buf,256,format,args);
+	VSNPRINTF(buf,510,format,args);
    	printf("%s\r\n",buf);
 
 	// write to file
@@ -175,7 +193,7 @@ void zhPlatPrint16(int len,char*buf)
 	printf("\r\n");
 }
 
-char* zhPlatPrintf16ToBuf(int len,char *buf,char*dstString)
+char* zhPlatPrintf16ToBuf(int len,char *buf,char*dstString,int dstStringLen)
 {
     char szbuf[10];
     short i=0;
@@ -183,11 +201,11 @@ char* zhPlatPrintf16ToBuf(int len,char *buf,char*dstString)
     dstString[0]=0;
     for(i=0;i<len;i++)
     {
-        sprintf(szbuf,"%02X",(unsigned char)buf[i]);
+        snprintf(szbuf,8,"%02X",(unsigned char)buf[i]);
         if(strlen(dstString))
-        sprintf(dstString,"%s %s",dstString,szbuf);
+        snprintf(dstString,dstStringLen,"%s %s",dstString,szbuf);
         else
-        sprintf(dstString,"%s",szbuf);
+        snprintf(dstString,dstStringLen,"%s",szbuf);
     }
     return dstString;
 }
