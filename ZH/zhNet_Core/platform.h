@@ -100,6 +100,7 @@ extern "C"{
 		extern pthread_t _pthreadid;
 		#define CREATE_THREAD(func,arg)		pthread_create(&_pthreadid,NULL,(void *(*)(void *))func,(void*)arg)
 		#define CREATE_THREAD_RET(ret)		((ret)!=0)
+		#define PVOID 				void*
 		#define _zh_thread_type
 	#endif
 
