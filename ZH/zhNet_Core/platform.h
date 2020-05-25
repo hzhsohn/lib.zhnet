@@ -56,6 +56,7 @@ extern "C"{
 
 #ifdef _WIN32
 	#include <windows.h>
+	#include <process.h>
 	#undef _countof
 	#define _countof(array) (sizeof(array)/sizeof(array[0]))
 	#define VSNPRINTF(a,b,c,d) _vsnprintf(a,b,c,d)
