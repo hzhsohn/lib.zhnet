@@ -1,4 +1,4 @@
-/*
+﻿/*
   socket.h:the base socket function wrapper
 */
 
@@ -233,6 +233,32 @@ int zhSockRecv(SOCKET s,char *buf, int buf_len)
 	return ret;
 }
 
+int zhSockRecv2(SOCKET s, char *buf, int buf_len,int block_sec)
+{
+	int ret;
+
+	if (zhSockCanRead(s, block_sec, 0) == false)
+		return 0;
+
+	/* in linux be careful of SIGPIPE */
+	ret = recv(s, buf, buf_len, 0);
+
+	if (ret == 0)
+	{
+		/* remote closed */
+		return -1;
+	}
+
+	if (ret == SOCKET_ERROR)
+	{
+		int err = GETERROR;
+		if (err != WSAEWOULDBLOCK)
+		{
+			return -1;
+		}
+	}
+	return ret;
+}
 
 bool zhSockCanRead(SOCKET s,int tv_sec,int tv_usec)
 {
