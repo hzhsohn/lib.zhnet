@@ -65,8 +65,8 @@ extern "C"{
 
 	/* thread operate*/
 	#ifndef _zh_thread_type
-                //CreateThread旧了要扔了
-	        //#define CREATE_THREAD(func,arg)	CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(LPVOID)arg,0,NULL)
+		//CreateThread旧了要扔了
+	    //#define CREATE_THREAD(func,arg)	CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(LPVOID)arg,0,NULL)
 		#define CREATE_THREAD_EX(func,arg)	_beginthreadex(   NULL,   0,   func,   (PVOID)arg,   0,   NULL   )
 		#define CREATE_THREAD(func,arg)		_beginthread(   func,0,   (PVOID)arg )
 		#define CREATE_THREAD_RET(ret)		((ret)==0)

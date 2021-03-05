@@ -159,7 +159,6 @@ bool zhSockConnect(SOCKET s,char *host, int port, unsigned long ip)
 	return true;
 }
 
-
 bool zhSockBlockingConnect(SOCKET s,char *host,int port, unsigned long ip)
 {
   // restart the socket mode
@@ -260,6 +259,35 @@ int zhSockRecv2(SOCKET s, char *buf, int buf_len,int tv_sec)
 	return ret;
 }
 
+
+int zhSockRecv3(SOCKET s, char *buf, int buf_len, int tv_usec)
+{
+	int ret = 0;
+
+	if (zhSockCanRead(s, 0, tv_usec) == false)
+		return 0;
+
+	/* in linux be careful of SIGPIPE */
+	ret = recv(s, buf, buf_len, 0);
+
+	if (ret == 0)
+	{
+		/* remote closed */
+		return -1;
+	}
+
+	if (ret == SOCKET_ERROR)
+	{
+		int err = GETERROR;
+		if (err != WSAEWOULDBLOCK)
+		{
+			return -1;
+		}
+	}
+	return ret;
+}
+
+
 bool zhSockCanRead(SOCKET s,int tv_sec,int tv_usec)
 {
 	int ret=0;
@@ -309,9 +337,26 @@ bool zhSockShutdown(SOCKET s,EzhNetShutdown shut)
 
 bool zhSockClose(SOCKET s)
 {
+	char buf[10] = { 0 };
+	int ret = 0;
 	if (s == INVALID_SOCKET) return false;
 	
 	shutdown(s, 1);//SHUT_WR
+	while (1)
+	{
+		if (zhSockCanRead(s, 0, 10))
+		{
+			ret = recv(s, buf, 10, 0);
+			if (0 == ret || -1 == ret)
+			{
+				break;
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
 	CLOSESOCKET(s);
 	zhSockReset(&s);
 	if (--g_nCount==0)

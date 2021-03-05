@@ -33,7 +33,7 @@ bool zhSionInit(TzhNetSession *sion,unsigned short wBindPort)
 	{
         if(!zhSockSetReuseAddr(sion->s,true)){ZH_NET_DEBUG_PRINTF("Reuse Addr Fail..!!");return false;}
         if(!zhSockBindAddr(sion->s,NULL,wBindPort)){return false;}
-    }
+  }
 	return true;
 }
 
@@ -185,8 +185,7 @@ bool zhSionCacheData(TzhNetSession *sion,EzhNetError* err)
 		return false;
 	}
 
-	nBufSize=zhSockRecv(sion->s,szTmpBuf,ZH_NET_PACKET_BODY_LENGTH);
-
+	nBufSize=zhSockRecv3(sion->s,szTmpBuf,ZH_NET_PACKET_BODY_LENGTH,10);
 	if(nBufSize!=SOCKET_ERROR)
 	{
 		if(nBufSize>0)
