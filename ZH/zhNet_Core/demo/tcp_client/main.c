@@ -69,10 +69,13 @@ void zhError(TzhNetSession*sion,void* info,EzhNetError err)
 
 int main(int argc,char *argv[])
 {
-	DWORD dwTime;
+	DWORD dwTime;	
+	unsigned char frame[ZH_NET_PACKET_BODY_LENGTH];
+	EzhNetError err;
+	int ret;
 	
 	//初始化网络
-	printf("开始连接");
+	printf("开始连接\n");
 	zhSionInit(&user,0);
 	zhSionSetInfo(&user,"我叫小白");
 	zhSionConnect(&user,"localhost",2323);
@@ -82,18 +85,20 @@ int main(int argc,char *argv[])
 
 	dwTime=zhPlatGetTime();
 	while(true)
-	{
+	{		
+		zhPlatSleep(1);
 		//网络数据处理-------begin
-		unsigned char frame[ZH_NET_PACKET_BODY_LENGTH];
-		EzhNetError err;
-		int ret;
+		if(!user.s)
+		{
+			continue;
+		}
 		if(false==zhSionCacheData(&user,&err))
 		{
 			zhError(&user,&user.pInfo,err);
 		}
 		while(1)
 		{
-			ret=zhSionReadData(&user,frame,&err);
+			ret=zhSionReadData(&user,frame,ZH_NET_PACKET_BODY_LENGTH,&err);
 			if(0==ret)
 			{ break; }
 			else if(ret>0)
@@ -128,7 +133,6 @@ int main(int argc,char *argv[])
 		}
 		//------------------end
 		NetKeepTime(&user);
-		zhPlatSleep(1);
 	}
 
 	getchar();

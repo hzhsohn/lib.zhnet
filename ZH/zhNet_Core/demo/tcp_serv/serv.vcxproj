@@ -98,7 +98,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\encrypt.c" />
     <ClCompile Include="..\..\netlist.c" />
     <ClCompile Include="..\..\packet.c" />
     <ClCompile Include="..\..\platform.c" />
@@ -107,7 +106,6 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\encrypt.h" />
     <ClInclude Include="..\..\gcdef.h" />
     <ClInclude Include="..\..\netlist.h" />
     <ClInclude Include="..\..\packet.h" />

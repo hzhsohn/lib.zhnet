@@ -37,7 +37,7 @@ int main(int argc,char *argv[])
 				}
 				while(1)
 				{
-					ret=zhSionReadData(&clientUser,frame,&err);
+					ret=zhSionReadData(&clientUser,frame,ZH_NET_PACKET_BODY_LENGTH,&err);
 					if(0==ret)
 					{ break; }
 					else if(ret>0)
