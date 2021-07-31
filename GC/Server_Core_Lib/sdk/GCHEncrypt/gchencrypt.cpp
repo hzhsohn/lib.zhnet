@@ -10,18 +10,9 @@
 
 int		g_nKeyCount				= 100;
 
-//加密信息
-BOOL	g_tZHEncryptType				=FALSE;
-
  
 BOOL Encrypt1(char* buf, int len, int nEncryptKey);
 BOOL Decrypt1(char* buf, int len, int nEncryptKey);
-
-
-DLLEXPORT_API VOID WINAPI GCApiSetEncryptEnable(BOOL isVariFlowEncrypt)
-{
-	g_tZHEncryptType=isVariFlowEncrypt;
-}
 
 //初始化未获取钥匙前默认秘密
 DLLEXPORT_MULT int GCApiGetDefaultKey()
@@ -30,10 +21,6 @@ DLLEXPORT_MULT int GCApiGetDefaultKey()
 	return 0;
 }
 
-DLLEXPORT_MULT BOOL GCApiGetEncryptState()
-{
-	return g_tZHEncryptType;
-}
 DLLEXPORT_MULT int GCApiGetEncryptKey()
 {
 	srand(GetTickCount()+g_nKeyCount+g_nKeyCount);

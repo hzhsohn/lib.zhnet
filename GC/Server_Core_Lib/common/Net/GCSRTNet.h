@@ -10,8 +10,7 @@ DLLEXPORT_API VOID WINAPI GCApiSRTNetProgramUnLoad();
 DLLEXPORT_API BOOL WINAPI GCEApiSRTNetInit(PFUN_RECV_DATA_CALLBACK pfnRecvDataCallback,
 											PFUN_DISCONNECT_CALLBACK pfnDisconnectCallback, 
 											PFUN_ACCEPT_CALLBACK pfnAcceptCallback, 
-											WORD wPort=0,
-										    BOOL isUseEnpty=FALSE);
+											WORD wPort=0);
 DLLEXPORT_API BOOL WINAPI GCEApiSRTNetSendPacket(HANDLE handle, int nLen, char* pData);
 
 DLLEXPORT_API char* WINAPI GCEApiSRTNetGetIp(char*host,char*ip);//”Ú√˚ªÒ»°IP

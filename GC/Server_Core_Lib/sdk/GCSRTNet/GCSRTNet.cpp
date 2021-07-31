@@ -82,10 +82,8 @@ DLLEXPORT_API VOID WINAPI GCApiSRTNetProgramUnLoad()
 DLLEXPORT_API BOOL WINAPI GCEApiSRTNetInit(PFUN_RECV_DATA_CALLBACK pfnRecvDataCallback,
 										   PFUN_DISCONNECT_CALLBACK pfnDisconnectCallback, 
 										   PFUN_ACCEPT_CALLBACK pfnAcceptCallback, 
-										   WORD wPort,
-										   BOOL isUseEnpty)
+										   WORD wPort)
 {
-	GCApiSetEncryptEnable(isUseEnpty);
 	GCH_MTRACE(_T("GCEApiSRTNetInit pfnRecvDataCallback=%p, pfnDisconnectCallback=%p, pfnAcceptCallback=%p"), pfnRecvDataCallback, pfnDisconnectCallback, pfnAcceptCallback);
 	GCH_MTRACE(_T("GCEApiSRTNetInit wPort=%d"), wPort);
 

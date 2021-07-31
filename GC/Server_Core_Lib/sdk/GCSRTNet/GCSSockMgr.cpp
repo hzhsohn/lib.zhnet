@@ -391,8 +391,6 @@ BOOL CGCSSockMgr::SendPacket(HANDLE handle, int nLen, char* pData)
 	pHeader->wDataLen = pOverlapped->wLeft-nHeadLen;
 	pHeader->wCRC16=GC_CRC::CRC16((unsigned char*)pData,nLen);
 
-	EncryptPack(pSockInfo->isVariFlowEncrypt,pSockInfo->nKey,pOverlapped->szBuff, pOverlapped->wLeft);
-
 	pOverlapped->wsabuf.buf=pOverlapped->szBuff;
 	pOverlapped->wsabuf.len=pOverlapped->wLeft;
 	nRet=WSASend(pSockInfo->s, &pOverlapped->wsabuf, 1, &dwSendBufferlen, 0, &pOverlapped->Overlapped,NULL);
@@ -566,11 +564,6 @@ BOOL CGCSSockMgr::RecvComplete(DWORD dwOperatCode, DWORD dwBytesTransferred, HAN
 		}
 		if(dwBytesTransferred == pOverlapped->wLeft)
 		{
-			memcpy(&pSockInfo->nKey,&pOverlapped->szBuff[0],4);
-			if(0==pSockInfo->nKey)//钥匙KEY为0就是不执行变流加密
-			{ pSockInfo->isVariFlowEncrypt=FALSE; }
-			else
-			{ pSockInfo->isVariFlowEncrypt=TRUE; }
 			pSockInfo->isAlreadyGetEncryptSeed=TRUE;
 
 			//正式进入接收帧数据
@@ -599,9 +592,7 @@ BOOL CGCSSockMgr::RecvComplete(DWORD dwOperatCode, DWORD dwBytesTransferred, HAN
 			{
 				//接收到的是数据头
 				GCSTH_Packet_Frame_Header *pHeader = (GCSTH_Packet_Frame_Header*)(pOverlapped->szBuff);
-
-				DecryptPackHead(pSockInfo->isVariFlowEncrypt,pSockInfo->nKey,pHeader);
-
+				
 				if(pHeader->wDataLen > PACKET_ONE_HEADER_LENGTH)
 				{
 					//数据体长度错误，关闭SOCKET
@@ -640,8 +631,6 @@ BOOL CGCSSockMgr::RecvComplete(DWORD dwOperatCode, DWORD dwBytesTransferred, HAN
 				//收到了完整的数据包
 				GCSTH_Packet_Frame* pPacket = (GCSTH_Packet_Frame*)pOverlapped->szBuff;
 				
-				DecryptPackBody(pSockInfo->isVariFlowEncrypt,pSockInfo->nKey,pPacket->data,pPacket->header.wDataLen);
-
 				//GCH_TRACE(_T("CGCSIoCP::RecvComplete wDataLen=%d.yTotal=%d, yPacketNo=%d, data=%s"), 
 				//	pPacket->header.wDataLen, pPacket->header.yTotal, pPacket->header.yPacketNo, pPacket->data);
 				//插入数据

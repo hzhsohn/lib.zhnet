@@ -156,13 +156,10 @@ BOOL  CGCSIoCP::SendEncryptKey(CGCSSockMgr* pSockMgr,GCSTS_Sock_Info *pSockInfo)
 	}
 	pOverlapped->dwOperatCode = GCE_Operate_Send;
 	
-	//加密
-	pSockInfo->isVariFlowEncrypt=GCApiGetEncryptState();
-	pSockInfo->nKey=pSockInfo->isVariFlowEncrypt?GCApiGetEncryptKey():0;
-
 	//种子钥匙
+	char nKey[4]={0};
 	pOverlapped->wLeft=4;
-	memcpy(&pOverlapped->szBuff[0],&pSockInfo->nKey,4);
+	memcpy(&pOverlapped->szBuff[0],nKey,4);
 
 	//发送
 	pOverlapped->wsabuf.buf=pOverlapped->szBuff;
@@ -186,7 +183,6 @@ BOOL  CGCSIoCP::SendEncryptKey(CGCSSockMgr* pSockMgr,GCSTS_Sock_Info *pSockInfo)
 
 	LeaveCriticalSection(&pSockMgr->m_cs);
 
-	GCH_XTRACE(_T("SendKey isVariFlowEncrypt=%d,wKey=%d"),pSockInfo->isVariFlowEncrypt, pSockInfo->nKey);
 	return TRUE;
 }
 

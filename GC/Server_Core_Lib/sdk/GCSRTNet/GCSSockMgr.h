@@ -49,8 +49,6 @@ struct GCSTS_Sock_Info
 
 	//加密钥匙和加密类型
 	BOOL		isAlreadyGetEncryptSeed;			//是否已经获取加密钥匙
-	int			nKey;				//加密钥匙
-	BOOL		isVariFlowEncrypt;  //是变流加密
 	HANDLE		hKey;
 
 	GCSTS_Sock_Info()
@@ -62,8 +60,6 @@ struct GCSTS_Sock_Info
 		m_pOutDat = NULL;
 		nLastActiveTime = 0;
 		pRecvOverlapped = NULL;
-		isVariFlowEncrypt=GCApiGetEncryptState();
-		nKey= GCApiGetDefaultKey();
 		isAlreadyGetEncryptSeed=FALSE;
 		hKey=CreateEvent(NULL,true,false,NULL);
 	}

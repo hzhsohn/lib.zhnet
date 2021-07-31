@@ -17,12 +17,9 @@
 #include "wtypes.h"
 
 
-//初始化加密信息
-DLLEXPORT_API VOID WINAPI GCApiSetEncryptEnable(BOOL isVariFlowEncrypt);
 
 //初始化未获取钥匙前默认秘密
 DLLEXPORT_MULT int GCApiGetDefaultKey();
-DLLEXPORT_MULT BOOL GCApiGetEncryptState();//是否启用变流加密
 
 //取得加密密钥
 DLLEXPORT_MULT int GCApiGetEncryptKey();
