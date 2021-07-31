@@ -1,0 +1,6 @@
+#include "encrypt.h"
+
+
+int zhNetGetRandEncryptKey();
+bool zhNetEncrypt(bool isNeedEncrypt,char* buf, int len,unsigned char nEncryptKey[4]);
+bool zhNetDecrypt(bool isNeedEncrypt,char* buf, int len,unsigned char nEncryptKey[4]);

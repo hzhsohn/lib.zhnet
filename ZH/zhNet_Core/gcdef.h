@@ -1,4 +1,4 @@
-/*
+ï»¿/*
   gcdef.h:the transmission manage
 */
 
@@ -31,35 +31,35 @@
  *
  *Begin---------->Network layer protocol in GCHPacket.h module docking
  *
- *Begin---------->ÍøÂç²ã¶Ô½ÓĞ­ÒéÔÚGCHPacket.hÄ£¿éÄÚ
+ *Begin---------->ç½‘ç»œå±‚å¯¹æ¥åè®®åœ¨GCHPacket.hæ¨¡å—å†…
 */
 
-#define ZH_NET_FRAME_FLAG	0x0A	//zhNetÀïÃæµÄÖ¡¹Ì¶¨Öµ
+#define ZH_NET_FRAME_FLAG	0x0A	//zhNeté‡Œé¢çš„å¸§å›ºå®šå€¼
 
 typedef struct _TzhPackFrameHeader
 {
 /*
  *Packet type, EzhPackType structural break
  *
- *°üµÄÀàĞÍ,EzhPackType½á¹¹Ğİ
+ *åŒ…çš„ç±»å‹,EzhPackTypeç»“æ„ä¼‘
 */
-	unsigned char   yFrameFlag;	//¹Ì¶¨ ZH_NET_FRAME_FLAG
-	unsigned char	wDataLenL1;   //ºóËæµÄ°üÌåµÄ³¤¶È
-	unsigned char	wDataLenL2;   //ºóËæµÄ°üÌåµÄ³¤¶ÈµÚ¶ş×Ö½Ú
-	unsigned char	wCRC16L1;     //°üÌåµÄCRCĞ£¼ì,µ±°ü³¤¶ÈÎª0Ê±CRCĞ£¼ìÖµÎª0
-	unsigned char	wCRC16L2;     //°üÌåµÄCRCĞ£¼ì,µ±°ü³¤¶ÈÎª0Ê±CRCĞ£¼ìÖµÎª0,µÚ¶ş×Ö½Ú
+	unsigned char   yFrameFlag;	//å›ºå®š ZH_NET_FRAME_FLAG
+	unsigned char	wDataLenL1;   //åéšçš„åŒ…ä½“çš„é•¿åº¦
+	unsigned char	wDataLenL2;   //åéšçš„åŒ…ä½“çš„é•¿åº¦ç¬¬äºŒå­—èŠ‚
+	unsigned char	wCRC16L1;     //åŒ…ä½“çš„CRCæ ¡æ£€,å½“åŒ…é•¿åº¦ä¸º0æ—¶CRCæ ¡æ£€å€¼ä¸º0
+	unsigned char	wCRC16L2;     //åŒ…ä½“çš„CRCæ ¡æ£€,å½“åŒ…é•¿åº¦ä¸º0æ—¶CRCæ ¡æ£€å€¼ä¸º0,ç¬¬äºŒå­—èŠ‚
 }TzhPackFrameHeader;
 
 /*
  *Begin---------->In the GCHNetUtil.h definition
  *
- *Begin---------->ÔÚGCHNetUtil.h¶¨Òå
+ *Begin---------->åœ¨GCHNetUtil.hå®šä¹‰
  */
  
 /*
  *Each time the maximum length, not including package head
  *
- *Ã¿´Î·¢°üµÄ×î´ó³¤¶È£¬²»°üÀ¨°üÍ·
+ *æ¯æ¬¡å‘åŒ…çš„æœ€å¤§é•¿åº¦ï¼Œä¸åŒ…æ‹¬åŒ…å¤´
 */
 #define ZH_NET_PACKET_BODY_LENGTH			1024
 #define ZH_NET_TCP_CACHE_LENGTH				1024*15

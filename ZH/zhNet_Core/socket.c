@@ -1,4 +1,4 @@
-/*
+﻿/*
   socket.h:the base socket function wrapper
 */
 
@@ -105,7 +105,7 @@ bool zhSockBindAddr(SOCKET s,char *ip,int port)
 	}
 	if(bind(s,(SOCKADDR *)&addrLocal,sizeof(addrLocal))==SOCKET_ERROR)
 	{
-		ZH_NET_DEBUG_PRINTF("bind socket error");
+		//ZH_NET_DEBUG_PRINTF("bind socket error");
 		return false;
 	}
 	return true;
@@ -159,7 +159,6 @@ bool zhSockConnect(SOCKET s,char *host, int port, unsigned long ip)
 	return true;
 }
 
-
 bool zhSockBlockingConnect(SOCKET s,char *host,int port, unsigned long ip)
 {
   // restart the socket mode
@@ -186,7 +185,6 @@ int zhSockSend(SOCKET s,char *buf, int len)
 {
 	int ret;
 
-	if (!zhSockCanWrite(s,0,0)) return 0;
 	/*
 	in linux be careful of SIGPIPE
 	*/
@@ -208,7 +206,7 @@ int zhSockSend(SOCKET s,char *buf, int len)
  */
 int zhSockRecv(SOCKET s,char *buf, int buf_len)
 {
-	int ret;
+	int ret=0;
 
 	if (zhSockCanRead(s,0,0)==false) 
 		return 0;
@@ -226,6 +224,61 @@ int zhSockRecv(SOCKET s,char *buf, int buf_len)
 	{
 		int err=GETERROR;
 		if (err!=WSAEWOULDBLOCK)
+		{
+			return -1;
+		}
+	}
+	return ret;
+}
+
+int zhSockRecv2(SOCKET s, char *buf, int buf_len,int tv_sec)
+{
+	int ret=0;
+
+	if (zhSockCanRead(s, tv_sec, 0) == false)
+		return 0;
+
+	/* in linux be careful of SIGPIPE */
+	ret = recv(s, buf, buf_len, 0);
+
+	if (ret == 0)
+	{
+		/* remote closed */
+		return -1;
+	}
+
+	if (ret == SOCKET_ERROR)
+	{
+		int err = GETERROR;
+		if (err != WSAEWOULDBLOCK)
+		{
+			return -1;
+		}
+	}
+	return ret;
+}
+
+
+int zhSockRecv3(SOCKET s, char *buf, int buf_len, int tv_usec)
+{
+	int ret = 0;
+
+	if (zhSockCanRead(s, 0, tv_usec) == false)
+		return 0;
+
+	/* in linux be careful of SIGPIPE */
+	ret = recv(s, buf, buf_len, 0);
+
+	if (ret == 0)
+	{
+		/* remote closed */
+		return -1;
+	}
+
+	if (ret == SOCKET_ERROR)
+	{
+		int err = GETERROR;
+		if (err != WSAEWOULDBLOCK)
 		{
 			return -1;
 		}
@@ -283,9 +336,26 @@ bool zhSockShutdown(SOCKET s,EzhNetShutdown shut)
 
 bool zhSockClose(SOCKET s)
 {
+	char buf[10] = { 0 };
+	int ret = 0;
 	if (s == INVALID_SOCKET) return false;
 	
 	shutdown(s, 1);//SHUT_WR
+	while (1)
+	{
+		if (zhSockCanRead(s, 0, 10))
+		{
+			ret = recv(s, buf, 10, 0);
+			if (0 == ret || -1 == ret)
+			{
+				break;
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
 	CLOSESOCKET(s);
 	zhSockReset(&s);
 	if (--g_nCount==0)
@@ -312,7 +382,6 @@ int zhSockSendTo(SOCKET s,char *buf, int len, struct sockaddr_in *addr)
 {
 	int ret=0;
 	int err=0;
-	if (!zhSockCanWrite(s,0,0)) return 0;
 
 	ret = sendto(s,buf,len,0,(SOCKADDR *)addr,sizeof(struct sockaddr_in));
 	if (ret==SOCKET_ERROR)
@@ -336,6 +405,23 @@ int zhSockRecvFrom(SOCKET s,char *buf, int buf_len, struct sockaddr_in *addr ,in
 	{
 		int err=GETERROR;
 		if (err!=WSAEWOULDBLOCK)
+		{
+			return -1;
+		}
+	}
+	return ret;
+}
+
+int zhSockRecvFrom2(SOCKET s, char *buf, int buf_len, struct sockaddr_in *addr, int *addrlen, int tv_sec)
+{
+	int ret;
+	if (!zhSockCanRead(s, tv_sec, 0)) return 0;
+
+	ret = recvfrom(s, buf, buf_len, 0, (SOCKADDR *)addr, (socklen_t *)addrlen);
+	if (ret == SOCKET_ERROR)
+	{
+		int err = GETERROR;
+		if (err != WSAEWOULDBLOCK)
 		{
 			return -1;
 		}

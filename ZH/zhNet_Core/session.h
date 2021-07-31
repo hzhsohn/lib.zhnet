@@ -38,7 +38,6 @@
 extern "C"{
 #endif
 
-#include "encrypt.h"
 #include "socket.h"
 #include "packet.h"
 #include "packet_heap.h"
@@ -155,12 +154,6 @@ typedef struct _TzhNetBPack
 typedef struct _TzhNetListen
 {
 	SOCKET		s;
-	/*
-	 *encrypt key and type,using for the transmission logic
-	 *
-	 *加密钥匙和加密类型
-	*/
-	bool		isStartupVariableFlowEncrypt;
 }TzhNetListen;
 
 /*
@@ -174,15 +167,7 @@ typedef struct _TzhNetSession
 
 	/*session status*/
 	EzhNetState	cState;
-	
-	/*
-	 *encrypt key and type,using for the transmission logic
-	 *
-	 *加密钥匙和加密类型
-	*/
-	unsigned char		nEncryptKey[4];
-	bool		isStartupVariableFlowEncrypt;
-	
+		
 	/*
 	 *check encrypt
 	 *
@@ -220,7 +205,7 @@ typedef struct _TzhNetSession
  *GCHEM_Encrypt_Type type 连接使用的加密模式
  *encrypt_default_key 初始化加密的密码
 */
-bool zhSionStartup(TzhNetListen* lisn,unsigned short wBindPort,bool isStartupVariableFlowEncrypt);
+bool zhSionStartup(TzhNetListen* lisn,unsigned short wBindPort);
 
 /*
  *client port for initizal function
@@ -352,7 +337,7 @@ bool zhSionRemoteAddr(TzhNetSession *sion,char *addr,unsigned short *port,unsign
  *
  *会话层逻辑函数,对私使用
 */
-void _zhSionSendKeyEncrypt(TzhNetSession *sion);
+void _zhSionSendKeyInit(TzhNetSession *sion);
 
 #ifdef __cplusplus
 }

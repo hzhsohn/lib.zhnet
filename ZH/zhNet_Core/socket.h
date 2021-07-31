@@ -1,4 +1,4 @@
-/*
+﻿/*
   socket.h:the base socket function wrapper
 */
 
@@ -160,8 +160,11 @@ SOCKET zhSockAccept(SOCKET s);
  *网络数据发送和接收处理
 */
 int zhSockRecv(SOCKET s,char *buf,int buf_len);
+int zhSockRecv2(SOCKET s, char *buf, int buf_len, int tv_sec);
+int zhSockRecv3(SOCKET s, char *buf, int buf_len, int tv_usec);
 int zhSockSend(SOCKET s,char *buf,int len);
 int zhSockRecvFrom(SOCKET s,char *buf,int buf_len,struct sockaddr_in *addr,int *addrlen);
+int zhSockRecvFrom2(SOCKET s, char *buf, int buf_len, struct sockaddr_in *addr, int *addrlen, int tv_sec);
 int zhSockSendTo(SOCKET s,char *buf,int len,struct sockaddr_in *addr);
 
 /*

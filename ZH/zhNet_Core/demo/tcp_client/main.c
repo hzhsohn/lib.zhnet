@@ -13,18 +13,20 @@ void zhError(TzhNetSession *sion,void* info,EzhNetError err);
 
 void NetKeepTime(TzhNetSession*sion)
 {
+    //这代码要放在zhSionReadData函数后面 
+	//TzhUserInfo *info;
 	DWORD dwTmp;
 	if(ezhNetStateConnected==sion->cState)
 	{
 		dwTmp=zhPlatGetTime();
-		//发送补活包一次 
-		if(dwTmp - dwKeepTime >500)
+		//1秒一次发送补活包一次 
+		if(dwTmp - dwKeepTime/*info->dwKeepTime*/>1000)
 		{            
 			//打包
 			TzhPacket pack;
 			zhPackWriteInit(&pack);
 			zhPackWriteInt(&pack, 2);
-			zhPackWriteString(&pack, "可爱可爱可爱");
+			zhPackWriteString(&pack, "可爱");
 			//发送
 			zhSionSend(sion,(char*)pack.btBuf,pack.wSize);
 			//
@@ -58,12 +60,6 @@ void zhRecv(TzhNetSession*sion,void*info,unsigned char*szBuf,int nLen)
 void zhDisconnect(TzhNetSession*sion,void*info)
 {
 	PRINTF("%s,Disconnect..! socket=%d",info,sion->s);
-	//
-	zhPlatSleep(2000);
-	printf("我是客户端....我正在重新连接...");
-	zhSionInit(&user,0);
-	zhSionSetInfo(&user,"我叫小黑");
-	zhSionConnect(&user,"localhost",2323);
 }
 
 void zhError(TzhNetSession*sion,void* info,EzhNetError err)
@@ -74,27 +70,30 @@ void zhError(TzhNetSession*sion,void* info,EzhNetError err)
 int main(int argc,char *argv[])
 {
 	DWORD dwTime;
-	unsigned char frame[ZH_NET_PACKET_BODY_LENGTH];
-	EzhNetError err;
-	int ret;
 	
 	//初始化网络
-	printf("我是客户端....我正在开始连接...");
+	printf("开始连接");
 	zhSionInit(&user,0);
 	zhSionSetInfo(&user,"我叫小白");
 	zhSionConnect(&user,"localhost",2323);
-	
+
+	//设置缓冲区大小
+	zhSionSetBigSockCache(&user,ezhPackCacheDefault);
+
 	dwTime=zhPlatGetTime();
 	while(true)
 	{
 		//网络数据处理-------begin
+		unsigned char frame[ZH_NET_PACKET_BODY_LENGTH];
+		EzhNetError err;
+		int ret;
 		if(false==zhSionCacheData(&user,&err))
 		{
 			zhError(&user,&user.pInfo,err);
 		}
 		while(1)
 		{
-			ret=zhSionReadData(&user,frame,sizeof(frame),&err);
+			ret=zhSionReadData(&user,frame,&err);
 			if(0==ret)
 			{ break; }
 			else if(ret>0)
@@ -105,9 +104,9 @@ int main(int argc,char *argv[])
 					frame,
 					ret);
 			}
-			if(err!=ezhNetNoError)
+			else
 			{
-				zhError(&user, user.pInfo, err);
+				zhError(&user,&user.pInfo,err);
 			}
 		}
 		switch(zhSionStateThread(&user))
