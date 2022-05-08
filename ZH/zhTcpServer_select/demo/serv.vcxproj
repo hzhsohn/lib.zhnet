@@ -98,7 +98,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\zhNet_Core\encrypt.c" />
     <ClCompile Include="..\..\zhNet_Core\netlist.c" />
     <ClCompile Include="..\..\zhNet_Core\packet.c" />
     <ClCompile Include="..\..\zhNet_Core\platform.c" />
@@ -109,7 +108,6 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\zhNet_Core\encrypt.h" />
     <ClInclude Include="..\..\zhNet_Core\gcdef.h" />
     <ClInclude Include="..\..\zhNet_Core\netlist.h" />
     <ClInclude Include="..\..\zhNet_Core\packet.h" />
