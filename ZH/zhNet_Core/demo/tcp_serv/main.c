@@ -15,11 +15,11 @@ int main(int argc,char *argv[])
 	TzhNetSession tmpUser;
 	
 	//³õÊ¼»¯ÍøÂç
-	ret=zhSionStartup(&g_listern,6696);
+	ret=zhSionStartup(&g_listern,2232);
 	if(ret)
 	{
 		PRINTF("Startup Server ok..!!");
-		PRINTF("BindPort=%d",6696);
+		PRINTF("BindPort=%d",2232);
 		while(true)
 		{
 				zhPlatSleep(1);

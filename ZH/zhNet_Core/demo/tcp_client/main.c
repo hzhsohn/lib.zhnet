@@ -74,7 +74,7 @@ void connectBegin()
 {
 	zhSionInit(&user,0);
 	zhSionSetInfo(&user,"name-is-xiaobai");
-	zhSionConnect(&user,"127.0.0.1",6696);
+	zhSionConnect(&user,"127.0.0.1",2232);
 }
 int main(int argc,char *argv[])
 {
