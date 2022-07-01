@@ -3,7 +3,7 @@
 TzhNetListen g_listern;
 TzhNetSession clientUser;
 
-void zhRecv(TzhNetSession *sion,void* info,char*szBuf,int nLen);
+void zhRecv(TzhNetSession *sion,void* info,unsigned char*szBuf,int nLen);
 void zhDisconnect(TzhNetSession*sion,void* info);
 void zhError(TzhNetSession* sion,void* info,EzhNetError err);
 
@@ -15,11 +15,11 @@ int main(int argc,char *argv[])
 	TzhNetSession tmpUser;
 	
 	//初始化网络
-	ret=zhSionStartup(&g_listern,2323);
+	ret=zhSionStartup(&g_listern,6696);
 	if(ret)
 	{
 		PRINTF("Startup Server ok..!!");
-		PRINTF("BindPort=%d",2323);
+		PRINTF("BindPort=%d",6696);
 		while(true)
 		{
 				zhPlatSleep(1);
@@ -82,14 +82,14 @@ void zhRecv(TzhNetSession *sion,void* info,unsigned char*szBuf,int nLen)
 	int idid;
 	char sstr[550];
 
-	zhPackReadInit(&pack,(BYTE*)szBuf,nLen);
+	zhPackReadInit(&pack,(unsigned char*)szBuf,nLen);
 	zhPackReadInt(&pack,&idid);
 	zhPackReadString(&pack,sstr);
 
 	PRINTF("zhRecv  nLen=%d  id=%d str=%s",nLen,idid,sstr);
 
 	zhPackWriteInit(&pack);
-	zhPackWriteString(&pack,"服务器发送过去的消息..");	
+	zhPackWriteString(&pack,"i am is server..");	
 	zhSionSendPacket(sion,&pack);
 }
 

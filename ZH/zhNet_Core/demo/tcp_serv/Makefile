@@ -1,29 +1,27 @@
 # Project: serv
 
-CPP  = g++
-CC   = gcc
-WINDRES = windres.exe
+CC = /bin/gcc
 RES  = 
-OBJ  = main.o ../lib/platform.o ../lib/packet.o ../lib/socket.o ../lib/session.o userlist.o proc.o ../lib/list.o ../lib/encrypt.o  $(RES)
-LINKOBJ  = main.o ../lib/platform.o ../lib/packet.o ../lib/socket.o ../lib/session.o userlist.o proc.o ../lib/list.o ../lib/encrypt.o $(RES)
+OBJ  = main.o ../lib/platform.o ../lib/packet.o ../lib/socket.o ../lib/session.o ../lib/packet_heap.o ../lib/netlist.o $(RES)
+LINKOBJ  = main.o ../lib/platform.o ../lib/packet.o ../lib/socket.o ../lib/session.o ../lib/packet_heap.o ../lib/netlist.o $(RES)
 LIBS =  
-INCS =  
+INCS = -I ../lib
 CXXINCS = 
-BIN  = ../bin/serv.exe
+BIN  = ./serv.exe
 CXXFLAGS = $(CXXINCS)  
 CFLAGS = $(INCS)  
 RM = rm -f
 
 .PHONY: all all-before all-after clean clean-custom
 
-all: all-before ../bin/serv.exe all-after
+all: all-before ./serv.exe all-after
 
 
 clean: clean-custom
 	${RM} $(OBJ) $(BIN)
 
 $(BIN): $(OBJ)
-	$(CC) $(LINKOBJ) -o "../bin/serv.exe" -pthread $(LIBS)
+	$(CC) $(LINKOBJ) -o "./serv.exe" -pthread $(LIBS)
 
 main.o: main.c
 	$(CC) -c main.c -o main.o $(CFLAGS)
@@ -46,8 +44,8 @@ userlist.o: userlist.c
 proc.o: proc.c
 	$(CC) -c proc.c -o proc.o $(CFLAGS)
 
-../lib/list.o: ../lib/list.c
-	$(CC) -c ../lib/list.c -o ../lib/list.o $(CFLAGS)
+../lib/netlist.o: ../lib/netlist.c
+	$(CC) -c ../lib/netlist.c -o ../lib/netlist.o $(CFLAGS)
 
-../lib/encrypt.o: ../lib/encrypt.c
+../lib/packet_heap.o: ../lib/packet_heap.c
 	$(CC) -c ../lib/encrypt.c -o ../lib/encrypt.o $(CFLAGS)

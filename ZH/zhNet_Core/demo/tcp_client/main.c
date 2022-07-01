@@ -3,11 +3,12 @@
 
 TzhNetSession user;
 TzhPacket pack;
-DWORD dwKeepTime=0;
+time_t dwKeepTime=0;
 
+void connectBegin();
 void NetKeepTime(TzhNetSession*sion);
 void zhConnect(TzhNetSession*sion,void*info,bool bResult);
-void zhRecv(TzhNetSession*sion,void*info,char*szBuf,int nLen);
+void zhRecv(TzhNetSession*sion,void*info,unsigned char*szBuf,int nLen);
 void zhDisconnect(TzhNetSession*sion,void*info);
 void zhError(TzhNetSession *sion,void* info,EzhNetError err);
 
@@ -15,7 +16,7 @@ void NetKeepTime(TzhNetSession*sion)
 {
     //这代码要放在zhSionReadData函数后面 
 	//TzhUserInfo *info;
-	DWORD dwTmp;
+	time_t dwTmp;
 	if(ezhNetStateConnected==sion->cState)
 	{
 		dwTmp=zhPlatGetTime();
@@ -26,7 +27,7 @@ void NetKeepTime(TzhNetSession*sion)
 			TzhPacket pack;
 			zhPackWriteInit(&pack);
 			zhPackWriteInt(&pack, 2);
-			zhPackWriteString(&pack, "可爱");
+			zhPackWriteString(&pack, "funny...");
 			//发送
 			zhSionSend(sion,(char*)pack.btBuf,pack.wSize);
 			//
@@ -49,10 +50,10 @@ void zhConnect(TzhNetSession*sion,void*info,bool bResult)
 
 void zhRecv(TzhNetSession*sion,void*info,unsigned char*szBuf,int nLen)
 {
-	char Str[1024];
+	char Str[1024]={0};
 	TzhPacket pack;
 
-	zhPackReadInit(&pack,(BYTE*)szBuf,nLen);
+	zhPackReadInit(&pack,(unsigned char*)szBuf,nLen);
 	zhPackReadString(&pack,Str);
 	PRINTF("%s,Data -> Size=%d ,  Str=%s ",info,pack.wSize,Str);
 }
@@ -60,27 +61,33 @@ void zhRecv(TzhNetSession*sion,void*info,unsigned char*szBuf,int nLen)
 void zhDisconnect(TzhNetSession*sion,void*info)
 {
 	PRINTF("%s,Disconnect..! socket=%d",info,sion->s);
+	zhPlatSleep(2000);
+	connectBegin();
 }
 
 void zhError(TzhNetSession*sion,void* info,EzhNetError err)
 {
-	printf("zhtcp %s,err=%d\n",info,err);
+	printf("zhtcp %s,err=%d\n",(char*)info,err);
 }
 
+void connectBegin()
+{
+	zhSionInit(&user,0);
+	zhSionSetInfo(&user,"name-is-xiaobai");
+	zhSionConnect(&user,"127.0.0.1",6696);
+}
 int main(int argc,char *argv[])
 {
-	DWORD dwTime;	
+	time_t dwTime;	
 	unsigned char frame[ZH_NET_PACKET_BODY_LENGTH];
 	EzhNetError err;
 	int ret;
 	
-	//初始化网络
-	printf("开始连接\n");
-	zhSionInit(&user,0);
-	zhSionSetInfo(&user,"我叫小白");
-	zhSionConnect(&user,"localhost",2323);
+	//初始化网络--
+	printf("connect begin...\n");
+	connectBegin();
 
-	//设置缓冲区大小
+	//设置缓冲区大小--
 	zhSionSetBigSockCache(&user,ezhPackCacheDefault);
 
 	dwTime=zhPlatGetTime();
