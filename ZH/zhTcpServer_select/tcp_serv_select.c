@@ -6,14 +6,14 @@
 
 TzhNetListen g_listern;
 TYPE_CS g_userCs;
-TzhNetList g_userList;//Î¨Ò»ÓÃ»§Á´±í
+TzhNetList g_userList;//å”¯ä¸€ç”¨æˆ·é“¾è¡¨
 TYPE_CS g_threadCs;
-TzhNetList g_threadList;//Ïß³Ì´¦Àí×éµÄÊı¾İ
+TzhNetList g_threadList;//çº¿ç¨‹å¤„ç†ç»„çš„æ•°æ®
 
 time_t g_dwNewTime;
 time_t g_dwOldTime;
 
-//»Øµ÷
+//å›è°ƒ
 ZH_ON_ACCEPT		*g_pfAccept=NULL;
 ZH_ON_DISCONNECT	*g_pfDisconnect=NULL;
 ZH_ON_RECEIVE		*g_pfReceive=NULL;
@@ -24,7 +24,7 @@ ZH_ON_REALTIME		*g_pfRealTime=NULL;
 //
 //add client session to the session list
 //
-//½«¿Í»§¶ËµÄ»á»°Ìí¼Óµ½SOCKETÁ´±íÀï
+//å°†å®¢æˆ·ç«¯çš„ä¼šè¯æ·»åŠ åˆ°SOCKETé“¾è¡¨é‡Œ
 //
 TagUserNode* ConnectAdd(TzhNetSession tmpSion);
 
@@ -32,7 +32,7 @@ TagUserNode* ConnectAdd(TzhNetSession tmpSion);
 //collection of multiple threads processing linked list,
 //every 64 sockets in the chain will create a new thread processing
 //
-//¶à¸öÏß³Ì´¦ÀíÁ´±í¼¯ºÏ,ÔÚÁ´±íÀïÃ¿´ïµ½64¸ösocket¾Í»áĞÂ½¨Ò»¸öÏß³Ì½øĞĞ´¦Àí
+//å¤šä¸ªçº¿ç¨‹å¤„ç†é“¾è¡¨é›†åˆ,åœ¨é“¾è¡¨é‡Œæ¯è¾¾åˆ°64ä¸ªsocketå°±ä¼šæ–°å»ºä¸€ä¸ªçº¿ç¨‹è¿›è¡Œå¤„ç†
 //
 void ProcThread(TagThreadNode *pThreadNode);
 
@@ -49,9 +49,9 @@ TagUserNode* ConnectAdd(TzhNetSession tmpSion)
 	{
 		goto _end;
 	}
-	//³õÊ¼»¯ÓÃ»§×ÊÁÏ
+	//åˆå§‹åŒ–ç”¨æˆ·èµ„æ–™
 	initizalUser(&node->userinfo);
-	//¸½Öµ½á¹¹
+	//é™„å€¼ç»“æ„
 	zhSionSetInfo(&node->sion,(void*)&node->userinfo);
 	for(pThreadNode = (TagThreadNode *)zhNetListFirst(&g_threadList); 
 		pThreadNode != NULL;
@@ -100,8 +100,8 @@ void ProcThread(TagThreadNode *pThreadNode)
 			{
 				if(pUser->user_node->sion.cState==ezhNetStateZero)
 				{
-					//Ö´ĞĞËùÓĞÁ¬½ÓµÄ²Ù×÷µÄÊ±ºò¼ÇµÃÒªËø¶¨ g_userCs ÁÙ½çÇø,²»È»»áÓĞ»ú»áÔÚÄ³¸ö
-					//Á´½ÓµôÏßµÄÊ±ºòÔì³É³ÌĞòpÀ£,»òÕß±éÀú²»ÍêÕû
+					//æ‰§è¡Œæ‰€æœ‰è¿æ¥çš„æ“ä½œçš„æ—¶å€™è®°å¾—è¦é”å®š g_userCs ä¸´ç•ŒåŒº,ä¸ç„¶ä¼šæœ‰æœºä¼šåœ¨æŸä¸ª
+					//é“¾æ¥æ‰çº¿çš„æ—¶å€™é€ æˆç¨‹åºæ¼°æºƒ,æˆ–è€…éå†ä¸å®Œæ•´
 					LOCK_CS(&g_userCs);
 					UserDelete(&g_userList,pUser->user_node->sion);
 					pUser=UserListDelete(&pThreadNode->pUserListNodeList,pUser->user_node);
@@ -110,7 +110,7 @@ void ProcThread(TagThreadNode *pThreadNode)
 				}
 				else
 				{
-					//ÍøÂçÊı¾İ´¦Àí-------begin
+					//ç½‘ç»œæ•°æ®å¤„ç†-------begin
 					if(false==zhSionCacheData(&pUser->user_node->sion,&err))
 					{
 						g_pfError(&pUser->user_node->sion,&pUser->user_node->sion.pInfo,err);
@@ -123,7 +123,7 @@ void ProcThread(TagThreadNode *pThreadNode)
 						else if(ret>0)
 						{
 							nDataProc++;
-							//´¦ÀíframeÊı¾İ
+							//å¤„ç†frameæ•°æ®
 							g_pfReceive(&pUser->user_node->sion,
 								pUser->user_node->sion.pInfo,
 								frame,
@@ -138,23 +138,23 @@ void ProcThread(TagThreadNode *pThreadNode)
 					}
 					switch(zhSionStateThread(&pUser->user_node->sion))
 					{
-							//Á¬½Ó³É¹¦
+							//è¿æ¥æˆåŠŸ
 						case ezhNetEventConnected:
 							break;
-							//Á¬½ÓÊ§°Ü
+							//è¿æ¥å¤±è´¥
 						case ezhNetEventConnectTimeout:
 							break;
-							//¶Ï¿ªÁ¬½Ó
+							//æ–­å¼€è¿æ¥
 						case ezhNetEventDisconnect:
 							g_pfDisconnect(&pUser->user_node->sion,
 								pUser->user_node->sion.pInfo);
 							break;
-							//Ã»ÓĞÊÂ¼ş
+							//æ²¡æœ‰äº‹ä»¶
 						case ezhNetNoEvent:
 							break;
 					}
 					//------------------end
-					g_pfRealTime(&pUser->user_node->sion,pUser->user_node->sion.pInfo);//±£»î°ü³¬Ê±¼ì²â
+					g_pfRealTime(&pUser->user_node->sion,pUser->user_node->sion.pInfo);//ä¿æ´»åŒ…è¶…æ—¶æ£€æµ‹
 					pUser = (TagUserListNode *)zhNetListNext((TzhNetNode *)pUser);
 				}
 			}
@@ -165,8 +165,8 @@ void ProcThread(TagThreadNode *pThreadNode)
 			}
 			UNLOCK_CS(&g_threadCs);
 
-			//Èç¹ûÁ¬½Ó300ºÁÃëÒÔÉÏ²»ĞİÃß¼´Ö´ĞĞÒ»´Î,Èç¹û´«ÊäÌ«Æµ·±ÒÔÈ·±£ÆäËüÏß³ÌÕı³£ÔËĞĞ
-			//nDataProcÈç¹ûÓĞÍøÂçÊı¾İ¼´²»ĞİÃß
+			//å¦‚æœè¿æ¥300æ¯«ç§’ä»¥ä¸Šä¸ä¼‘çœ å³æ‰§è¡Œä¸€æ¬¡,å¦‚æœä¼ è¾“å¤ªé¢‘ç¹ä»¥ç¡®ä¿å…¶å®ƒçº¿ç¨‹æ­£å¸¸è¿è¡Œ
+			//nDataProcå¦‚æœæœ‰ç½‘ç»œæ•°æ®å³ä¸ä¼‘çœ 
 			dwTmp=zhPlatGetTime();
 			if(0==nDataProc || dwTmp-pThreadNode->dwSleepTime>300)
 			{
@@ -202,29 +202,29 @@ void zhInitTcpProc(unsigned short		wBindPort,
 	INIT_CS(&g_threadCs);
 	INIT_CS(&g_userCs);
 
-	//³õÊ¼»¯ÍøÂç
+	//åˆå§‹åŒ–ç½‘ç»œ
 	zhNetListInit(&g_userList);
 	g_dwOldTime=zhPlatGetTime();
 
-	ret=zhSionStartup(&g_listern,wBindPort,isVariableFlowEncrypt);
+	ret=zhSionStartup(&g_listern,wBindPort);
 	if(ret)
 	{
 		TCP_PRINT_LOG("Startup Server ok..!!");
 		TCP_PRINT_LOG("BindPort=%d",wBindPort);
 		while(true)
 		{
-			//¼ÆËã´¦ÀíÊ±¼ä,ÔÚĞ¡ÓÚ80ºÁÃëÄÚÁ¬Ğø¼ÓÈëµÄÁ¬Ğø¶¼²»ĞèÒª1ºÁÃëµÄÑÓÊ±
+			//è®¡ç®—å¤„ç†æ—¶é—´,åœ¨å°äº80æ¯«ç§’å†…è¿ç»­åŠ å…¥çš„è¿ç»­éƒ½ä¸éœ€è¦1æ¯«ç§’çš„å»¶æ—¶
 			g_dwNewTime=zhPlatGetTime();
 			if(g_dwNewTime-g_dwOldTime>100){zhPlatSleep(1);}
 		
 			if(zhSionAccept(&g_listern,&tmpUser))
 			{
-				//¿ÉÒÔÔÚÕâÀï¼ÓÈëÁ¬½ÓÊıÁ¿ÏŞÖÆ
+				//å¯ä»¥åœ¨è¿™é‡ŒåŠ å…¥è¿æ¥æ•°é‡é™åˆ¶
 				if(zhNetListCount(&g_userList)<TCP_MAX_CONNECTED)
 				{
 					TagUserNode*unode;
-					//ÊÇ·ñÈ¡ÓÃ´óSOCKET(64K)»º³åÇø,²»È¡ÓÃ²»È»ÓĞÊ±ºò·¢ËÍ´óÓÚ8KÒÔÉÏµÄ°ü»á¶ªÊ§
-					//Èç¹ûÊÇĞ¡ĞÍÇ¶ÈëÊ½Éè±¸3K¾Í×ã¹»ÁË,¸ù¾İÇé¿öÊ¹ÓÃ
+					//æ˜¯å¦å–ç”¨å¤§SOCKET(64K)ç¼“å†²åŒº,ä¸å–ç”¨ä¸ç„¶æœ‰æ—¶å€™å‘é€å¤§äº8Kä»¥ä¸Šçš„åŒ…ä¼šä¸¢å¤±
+					//å¦‚æœæ˜¯å°å‹åµŒå…¥å¼è®¾å¤‡3Kå°±è¶³å¤Ÿäº†,æ ¹æ®æƒ…å†µä½¿ç”¨
 					zhSionSetBigSockCache(&tmpUser,ezhPackCache64K);
 					unode=ConnectAdd(tmpUser);
 					if(unode)
