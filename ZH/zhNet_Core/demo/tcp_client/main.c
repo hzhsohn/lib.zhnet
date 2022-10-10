@@ -24,13 +24,22 @@ void NetKeepTime(TzhNetSession*sion)
 		if(dwTmp - dwKeepTime/*info->dwKeepTime*/>1000)
 		{            
 			//打包
-			TzhPacket pack;
+			/*TzhPacket pack;
 			zhPackWriteInit(&pack);
 			zhPackWriteInt(&pack, 2);
 			zhPackWriteString(&pack, "funny...");
 			//发送
-			zhSionSend(sion,(char*)pack.btBuf,pack.wSize);
+			zhSionSend(sion,(char*)pack.btBuf,pack.wSize);*/
 			//
+			//K是指令,iotdev是获取设备的协议标识--
+			char sbf[12] = { 0 };
+			int server_id =666;
+			sbf[0] = 'K';
+			memcpy(&sbf[1], &server_id, 4);
+			strncpy(&sbf[5], "iotdev", 7);
+			dwKeepTime = dwTmp;
+			zhSionSend(sion, sbf, sizeof(sbf));
+
             dwKeepTime=dwTmp;
 		}
 	}
@@ -53,9 +62,10 @@ void zhRecv(TzhNetSession*sion,void*info,unsigned char*szBuf,int nLen)
 	char Str[1024]={0};
 	TzhPacket pack;
 
-	zhPackReadInit(&pack,(unsigned char*)szBuf,nLen);
-	zhPackReadString(&pack,Str);
-	PRINTF("%s,Data -> Size=%d ,  Str=%s ",info,pack.wSize,Str);
+	//zhPackReadInit(&pack,(unsigned char*)szBuf,nLen);
+	//zhPackReadString(&pack,Str);
+	PRINTF("%s,Data -> Size=%d ,  nLen=%d ",info, nLen);
+	zhPlatPrint16(nLen, szBuf);
 }
 
 void zhDisconnect(TzhNetSession*sion,void*info)
@@ -67,14 +77,16 @@ void zhDisconnect(TzhNetSession*sion,void*info)
 
 void zhError(TzhNetSession*sion,void* info,EzhNetError err)
 {
-	printf("zhtcp %s,err=%d\n",(char*)info,err);
+	printf("zhError %s,errID=%d\n",(char*)info,err);
 }
 
 void connectBegin()
 {
 	zhSionInit(&user,0);
 	zhSionSetInfo(&user,"name-is-xiaobai");
-	zhSionConnect(&user,"127.0.0.1",2232);
+	//zhSionConnect(&user,"127.0.0.1",2232);
+
+	zhSionConnect(&user, "hanzhihong.cn", 6696);
 }
 int main(int argc,char *argv[])
 {
@@ -110,7 +122,7 @@ int main(int argc,char *argv[])
 			{ break; }
 			else if(ret>0)
 			{
-				//处理frame数据
+				//处理frame数据--
 				zhRecv(&user,
 					user.pInfo,
 					frame,
@@ -123,18 +135,18 @@ int main(int argc,char *argv[])
 		}
 		switch(zhSionStateThread(&user))
 		{
-				//连接成功
+				//连接成功--
 			case ezhNetEventConnected:
 				zhConnect(&user, user.pInfo,true);
 				break;
-				//连接失败
+				//连接失败--
 			case ezhNetEventConnectTimeout:
 				break;
-				//断开连接
+				//断开连接--
 			case ezhNetEventDisconnect:
 				zhDisconnect(&user, user.pInfo);
 				break;
-				//没有事件
+				//没有事件--
 			case ezhNetNoEvent:
 				break;
 		}

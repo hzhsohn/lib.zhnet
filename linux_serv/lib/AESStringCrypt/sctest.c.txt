@@ -1,0 +1,181 @@
+/*
+ *  String Crypt Test (Linux)
+ *  Copyright (C) 2012, 2015
+ *
+ *  Author: Paul E. Jones <paulej@packetizer.com>
+ *
+ * This software is licensed as "freeware."  Permission to distribute
+ * this software in source and binary forms is hereby granted without a
+ * fee.  THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESSED OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ * THE AUTHOR SHALL NOT BE HELD LIABLE FOR ANY DAMAGES RESULTING FROM
+ * THE USE OF THIS SOFTWARE, EITHER DIRECTLY OR INDIRECTLY, INCLUDING,
+ * BUT NOT LIMITED TO, LOSS OF DATA OR DATA BEING RENDERED INACCURATE.
+ *
+ */
+
+#include <stdio.h>
+#include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+//#include <Wincrypt.h>
+#else
+#include <unistd.h>
+#endif
+
+#include "AESStringCrypt.h"
+
+/*
+ * Define how many test vectors to consider
+ */
+#define TEST_COUNT 21
+
+/*
+ * Dummy string
+ */
+#define DUMMY_STRING \
+    "VOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOID" \
+    "VOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOID" \
+    "VOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOID" \
+    "VOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOIDVOID"
+
+/*
+ * Main will just perform some simple test
+ */
+int main(int argc, char *argv[])
+{
+
+    char plaintext[512],
+         ciphertext[512+68];
+
+    char pass[32]={0};
+
+    int  i,
+         passlen;
+    unsigned long long plaintext_length,
+                       ciphertext_length;
+    char *plaintext_tests[TEST_COUNT] =
+    {
+        "",
+        "0",
+        "012",
+        "0123456789ABCDE",
+        "0123456789ABCDEF",
+        "0123456789ABCDEF0",
+        "0123456789ABCDEF0123456789ABCDE",
+        "0123456789ABCDEF0123456789ABCDEF",
+        "0123456789ABCDEF0123456789ABCDEF0",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDE",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDE",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+            "0123456789ABCDE",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+            "0123456789ABCDEF",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+            "0123456789ABCDEF0",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" 
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" 
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDE",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" 
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" 
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
+        "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" 
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF" 
+            "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0"
+    };
+
+    /*
+     * Run through tests
+     */
+    for(i=0;i<TEST_COUNT;i++)
+    {
+        printf("\nStarting test %i\n", i+1);
+
+        /*
+         * We will use the password "Hello"
+         */
+        strcpy(pass, "Hello");
+        passlen = (int) strlen(pass) ;
+
+
+        if (passlen <= 0)
+        {
+            printf("Error converting the password to UTF-16LE\n");
+            return -1;
+        }
+
+        /*
+         * Put the text vector into "plaintext"
+         */
+        strcpy(plaintext, plaintext_tests[i]);
+        printf("Plaintext: %s\n", plaintext);
+        printf("Plaintext length: %d\n", strlen(plaintext));
+
+        /*
+         * Encrypt the string
+         */
+        printf("Encrypting...\n");
+        ciphertext_length = AESStringCrypt( (unsigned char*) pass,
+                                            passlen,
+                                            (unsigned char*) plaintext,
+                                            strlen(plaintext),
+                                            (unsigned char*) ciphertext);
+
+        if (ciphertext_length == AESSTRINGCRYPT_ERROR)
+        {
+            printf("Error encrypting the string\n");
+        }
+
+        printf("Ciphertext length: %llu\n", ciphertext_length);
+
+
+        /*
+         * Decrypt the ciphertext
+         */
+        strcpy(plaintext, DUMMY_STRING);
+        printf("Decrypting...\n");
+        plaintext_length = AESStringDecrypt((unsigned char *) pass,
+                                            passlen,
+                                            (unsigned char *) ciphertext,
+                                            ciphertext_length,
+                                            (unsigned char *) plaintext);
+
+        if (plaintext_length == AESSTRINGCRYPT_ERROR)
+        {
+            printf("Error decrypting the string\n");
+        }
+
+        printf("Decrypted plaintext length: %llu\n", plaintext_length);
+
+        if (plaintext_length != strlen(plaintext_tests[i]))
+        {
+            printf("Decrypted length does not match original input length!\n");
+            return -1;
+        }
+
+        /*
+         * Let's insert a string terminator
+         */
+        plaintext[plaintext_length] = '\0';
+
+        if (plaintext_length && strcmp(plaintext_tests[i], plaintext))
+        {
+            printf("Decrypted string does not match!\n");
+            return -1;
+        }
+
+        printf("Plaintext matches input: %s\n", plaintext);
+    }
+
+    printf("\nAll tests passed successfully\n\n");
+
+    return 0;
+}

@@ -1,0 +1,26 @@
+project Default is
+
+   for Source_Dirs use ("src", "lib/**");
+   for Object_Dir use "Debug/obj";
+   for Main use ("main.cpp");
+   for Languages use ("C", "C++");
+
+   package Naming is
+      for Spec_Suffix ("c++") use ".hh";
+      for Body_Suffix ("c++") use ".cpp";
+   end Naming;
+
+   for Exec_Dir use "Debug/gnat";
+
+   package Compiler is
+      for Switches ("c") use ("-g", "-pthread", "-fPIC", "-lrt", "-ldl");
+      for Switches ("c++") use ("-g", "-pthread", "-fPIC", "-lrt", "-ldl", "-std=c++11", "-DOS_LINUX");
+   end Compiler;
+
+   package Linker is
+      for Switches ("c") use ("-g", "-pthread", "-fPIC", "-lrt", "-ldl");
+      for Switches ("c++") use ("-g", "-pthread", "-fPIC", "-lrt", "-ldl", "-std=c++11", "-DOS_LINUX");
+   end Linker;
+
+end Default;
+

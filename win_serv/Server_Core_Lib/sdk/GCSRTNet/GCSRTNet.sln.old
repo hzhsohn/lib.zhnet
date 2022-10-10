@@ -1,0 +1,22 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GCSRTNet", "GCSRTNet.vcproj", "{C9FDD0A7-48DE-402A-AA9F-7E0BDBE54332}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C9FDD0A7-48DE-402A-AA9F-7E0BDBE54332}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C9FDD0A7-48DE-402A-AA9F-7E0BDBE54332}.Debug|Win32.Build.0 = Debug|Win32
+		{C9FDD0A7-48DE-402A-AA9F-7E0BDBE54332}.Release|Win32.ActiveCfg = Release|Win32
+		{C9FDD0A7-48DE-402A-AA9F-7E0BDBE54332}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
+EndGlobal

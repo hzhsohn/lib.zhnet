@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include "inifile.h"
+ 
+#define BUF_SIZE 256
+
+int main()
+{
+    const char *file = "config.ini";
+    
+    char value[BUF_SIZE] = {0};
+
+	TzhIniSection* ary_section;
+	TzhIniKey* ary_key;
+	int ary_count=0;
+    
+    //读取字符串
+    if(!zhIniReadString("FileInfo123", "Version12", value, BUF_SIZE, "", file))
+    {
+        printf("Read ini file fail!!\n");
+    }
+    else
+    {
+        int y = zhIniReadInt("ProjectInfo", "AutoRun", 0, file);
+
+		printf("Read:[FileInfo123] Version12=%s\n", value);
+        printf("Read:[ProjectInfo] AutoRun=%d\n", y);
+    }
+   /*
+
+   //写入
+
+    if(!write_profile_string(section, "123", "43abc", file))
+    {
+        printf("Write fail");
+    }
+    if(!write_profile_string(section, "12345555", "321", file))
+    {
+        printf("Write fail");
+    }
+	*/
+
+	printf("\n");
+
+
+	//读取节点
+	ary_section=read_profile_section(&ary_count,file);
+	printf("ary_section_count=%d\r\n",ary_count);
+	{
+		TzhIniSection* p;
+		p=ary_section;
+		while(p)
+		{
+			printf("section: '%s'\r\n",p->name);
+			p=p->next;
+		}
+	}
+	free_profile_section(ary_section);
+
+	printf("\n");
+
+	//读取键值
+	ary_key=read_profile_key("FileInfo123",&ary_count,file);
+	printf("FileInfo123 ary_key_count=%d\r\n",ary_count);
+	{
+		TzhIniKey* p;
+		p=ary_key;
+		while(p)
+		{
+			printf("key: '%s'\r\n",p->name);
+			p=p->next;
+		}
+	}
+	free_profile_key(ary_key);
+
+    getchar();
+    return 0;
+}
