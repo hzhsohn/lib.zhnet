@@ -52,6 +52,8 @@ bool zhSock_NetStartUp(int VersionHigh,int VersionLow)
 		return false;
 	}
 	ZH_NET_DEBUG_PRINTF("WSAStartup OK");
+#else
+   signal (SIGPIPE, SIG_IGN);
 #endif
 	return true;
 }
