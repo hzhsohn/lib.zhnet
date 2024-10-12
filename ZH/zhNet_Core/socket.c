@@ -21,9 +21,8 @@
 */
 
 #include "socket.h"
-#include <stdio.h>
 
-int g_nCount = 0;
+int g_nSockInit = 0;
 
 bool zhSock_NetStartUp(int VersionHigh,int VersionLow)
 {
@@ -52,8 +51,7 @@ bool zhSock_NetStartUp(int VersionHigh,int VersionLow)
 		return false;
 	}
 	ZH_NET_DEBUG_PRINTF("WSAStartup OK");
-#else
-   signal (SIGPIPE, SIG_IGN);
+
 #endif
 	return true;
 }
@@ -68,8 +66,14 @@ bool zhSock_NetCleanUp()
 
 bool zhSockInit(SOCKET *s,EzhNetType protocol)
 {
-	if (g_nCount++==0)
-		if (!zhSock_NetStartUp(1,1)) return false;
+  #ifndef WIN32
+    signal (SIGPIPE, SIG_IGN);
+  #endif
+  
+	if (g_nSockInit++ == 0)
+	{
+		if (!zhSock_NetStartUp(1, 1)) return false;
+	}
 
 	switch (protocol)
 	{
@@ -115,7 +119,7 @@ bool zhSockBindAddr(SOCKET s,char *ip,int port)
 
 bool zhSockListen(SOCKET s)
 {
-	if(listen(s,SOMAXCONN)==SOCKET_ERROR)
+  if(listen(s,SOMAXCONN)==SOCKET_ERROR)
 	{
 		ZH_NET_DEBUG_PRINTF("NetSocket:listen error");
 		return false;
@@ -206,66 +210,11 @@ int zhSockSend(SOCKET s,char *buf, int len)
  * >  0	bytes recv
  * = -1 net dead
  */
-int zhSockRecv(SOCKET s,char *buf, int buf_len)
-{
-	int ret=0;
-
-	if (zhSockCanRead(s,0,0)==false) 
-		return 0;
-
-	/* in linux be careful of SIGPIPE */
-	ret = recv(s,buf,buf_len,0);
-	
-	if (ret==0)
-	{
-		/* remote closed */
-		return -1;
-	}
-
-	if (ret==SOCKET_ERROR)
-	{
-		int err=GETERROR;
-		if (err!=WSAEWOULDBLOCK)
-		{
-			return -1;
-		}
-	}
-	return ret;
-}
-
-int zhSockRecv2(SOCKET s, char *buf, int buf_len,int tv_sec)
-{
-	int ret=0;
-
-	if (zhSockCanRead(s, tv_sec, 0) == false)
-		return 0;
-
-	/* in linux be careful of SIGPIPE */
-	ret = recv(s, buf, buf_len, 0);
-
-	if (ret == 0)
-	{
-		/* remote closed */
-		return -1;
-	}
-
-	if (ret == SOCKET_ERROR)
-	{
-		int err = GETERROR;
-		if (err != WSAEWOULDBLOCK)
-		{
-			return -1;
-		}
-	}
-	return ret;
-}
-
-
-int zhSockRecv3(SOCKET s, char *buf, int buf_len, int tv_usec)
+int zhSockRecv(SOCKET s, char *buf, int buf_len, int tv_sec)
 {
 	int ret = 0;
 
-	if (zhSockCanRead(s, 0, tv_usec) == false)
+	if (zhSockCanRead(s, tv_sec , 0) == false)
 		return 0;
 
 	/* in linux be careful of SIGPIPE */
@@ -338,30 +287,13 @@ bool zhSockShutdown(SOCKET s,EzhNetShutdown shut)
 
 bool zhSockClose(SOCKET s)
 {
-	char buf[10] = { 0 };
 	int ret = 0;
 	if (s == INVALID_SOCKET) return false;
 	
-	shutdown(s, 1);//SHUT_WR
-	while (1)
+	if (zhSockShutdown(s, ezhNetShutDownRDWR))
 	{
-		if (zhSockCanRead(s, 0, 10))
-		{
-			ret = recv(s, buf, 10, 0);
-			if (0 == ret || -1 == ret)
-			{
-				break;
-			}
-		}
-		else
-		{
-			break;
-		}
+		CLOSESOCKET(s);
 	}
-	CLOSESOCKET(s);
-	zhSockReset(&s);
-	if (--g_nCount==0)
-		zhSock_NetCleanUp();
 	return true;
 }
 
@@ -369,14 +301,16 @@ SOCKET zhSockAccept(SOCKET s)
 {
 	struct sockaddr_in addr={0};
 	int len = sizeof(addr);
-	SOCKET tmp;
+  SOCKET tmp;
+  //must be need sleep--
+  zhPlatSleep(40);
 	tmp = accept(s,(SOCKADDR *)&addr,(socklen_t *)&len);
 	if (tmp == INVALID_SOCKET || tmp == 0)
 	{
 		//PRINTF("accept error");
 		return 0;
 	}
-	g_nCount++;
+	g_nSockInit++;
 	return tmp;	
 }
 
@@ -397,24 +331,7 @@ int zhSockSendTo(SOCKET s,char *buf, int len, struct sockaddr_in *addr)
 	return ret;
 }
 
-int zhSockRecvFrom(SOCKET s,char *buf, int buf_len, struct sockaddr_in *addr ,int *addrlen)
-{
-	int ret;
-	if (!zhSockCanRead(s,0,0)) return 0;
-
-	ret = recvfrom(s,buf,buf_len,0,(SOCKADDR *)addr,(socklen_t *)addrlen);
-	if (ret==SOCKET_ERROR)
-	{
-		int err=GETERROR;
-		if (err!=WSAEWOULDBLOCK)
-		{
-			return -1;
-		}
-	}
-	return ret;
-}
-
-int zhSockRecvFrom2(SOCKET s, char *buf, int buf_len, struct sockaddr_in *addr, int *addrlen, int tv_sec)
+int zhSockRecvFrom(SOCKET s, char *buf, int buf_len, struct sockaddr_in *addr, int *addrlen, int tv_sec)
 {
 	int ret;
 	if (!zhSockCanRead(s, tv_sec, 0)) return 0;
@@ -573,11 +490,6 @@ bool zhSockSetReuseAddr(SOCKET s,bool reuse)
 	return true;
 }
 
-int zhSockGetCount()
-{
-	return g_nCount;
-}
-
 char* zhSockGetIp(char*host)
 {
 #ifdef _WIN32
@@ -587,20 +499,22 @@ char* zhSockGetIp(char*host)
 	unsigned long lgIP;
 	ip=NULL;
 	lgIP = inet_addr(host);   
-	//输入的IP字符串,这是适应WINCE
+	//输入的IP字符串,这是适应WINCE--
 	if(lgIP != INADDR_NONE)  
 	{
 		return host;
 	}
-
-	if(WSAStartup(MAKEWORD(2,0), &wsaData)== 0)
-	{ 
-		if((hostinfo = gethostbyname(host)) != NULL)
-		{
-			ip = inet_ntoa (*(struct in_addr *)*hostinfo->h_addr_list); 
-		} 
-		WSACleanup();
+	
+	if (g_nSockInit++ == 0)
+	{
+		//WSAStartup(MAKEWORD(2,0), &wsaData)
+		if (!zhSock_NetStartUp(1, 1)) return false;
 	}
+	
+	if((hostinfo = gethostbyname(host)) != NULL)
+	{
+		ip = inet_ntoa (*(struct in_addr *)*hostinfo->h_addr_list); 
+	} 
 	return ip;
 #else
     struct hostent *hostInfo;    
