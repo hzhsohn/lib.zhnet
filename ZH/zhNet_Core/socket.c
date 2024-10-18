@@ -303,7 +303,7 @@ SOCKET zhSockAccept(SOCKET s)
 	int len = sizeof(addr);
   SOCKET tmp;
   //must be need sleep--
-  zhPlatSleep(40);
+  zhPlatSleep(30);
 	tmp = accept(s,(SOCKADDR *)&addr,(socklen_t *)&len);
 	if (tmp == INVALID_SOCKET || tmp == 0)
 	{
